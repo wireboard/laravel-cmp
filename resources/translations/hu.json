@@ -1,0 +1,26 @@
+{
+    "consentModal": {
+        "title": "Sütiket használunk",
+        "description": "Sütiket és hasonló technológiákat használunk az élmény javítása és a forgalom elemzése érdekében. Az alábbi beállításokból választhat.",
+        "acceptAllBtn": "Összes elfogadása",
+        "showPreferencesBtn": "Beállítások kezelése"
+    },
+    "preferencesModal": {
+        "title": "Süti beállítások",
+        "acceptAllBtn": "Összes elfogadása",
+        "savePreferencesBtn": "Beállítások mentése",
+        "closeIconLabel": "Bezárás",
+        "sections": [
+            {
+                "title": "Szükséges sütik",
+                "description": "Ezek a sütik elengedhetetlenek a weboldal megfelelő működéséhez. Nem kapcsolhatók ki.",
+                "linkedCategory": "necessary"
+            },
+            {
+                "title": "Analitikai sütik",
+                "description": "Ezek a sütik segítenek megérteni, hogyan használják a látogatók weboldalunkat, anonim információk gyűjtésével.",
+                "linkedCategory": "analytics"
+            }
+        ]
+    }
+}

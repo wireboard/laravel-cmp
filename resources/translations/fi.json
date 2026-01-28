@@ -1,0 +1,26 @@
+{
+    "consentModal": {
+        "title": "Käytämme evästeitä",
+        "description": "Käytämme evästeitä ja vastaavia teknologioita parantaaksemme kokemustasi ja analysoidaksemme liikennettä. Voit valita asetuksesi alla.",
+        "acceptAllBtn": "Hyväksy kaikki",
+        "showPreferencesBtn": "Hallitse asetuksia"
+    },
+    "preferencesModal": {
+        "title": "Evästeasetukset",
+        "acceptAllBtn": "Hyväksy kaikki",
+        "savePreferencesBtn": "Tallenna asetukset",
+        "closeIconLabel": "Sulje",
+        "sections": [
+            {
+                "title": "Välttämättömät evästeet",
+                "description": "Nämä evästeet ovat välttämättömiä verkkosivuston toiminnalle. Niitä ei voi poistaa käytöstä.",
+                "linkedCategory": "necessary"
+            },
+            {
+                "title": "Analytiikkaevästeet",
+                "description": "Nämä evästeet auttavat meitä ymmärtämään, miten vierailijat käyttävät verkkosivustoamme keräämällä nimettömiä tietoja.",
+                "linkedCategory": "analytics"
+            }
+        ]
+    }
+}

@@ -1,0 +1,26 @@
+{
+    "consentModal": {
+        "title": "Używamy plików cookie",
+        "description": "Używamy plików cookie i podobnych technologii, aby poprawić Twoje doświadczenia i analizować ruch. Możesz wybrać swoje preferencje poniżej.",
+        "acceptAllBtn": "Zaakceptuj wszystko",
+        "showPreferencesBtn": "Zarządzaj preferencjami"
+    },
+    "preferencesModal": {
+        "title": "Preferencje plików cookie",
+        "acceptAllBtn": "Zaakceptuj wszystko",
+        "savePreferencesBtn": "Zapisz preferencje",
+        "closeIconLabel": "Zamknij",
+        "sections": [
+            {
+                "title": "Niezbędne pliki cookie",
+                "description": "Te pliki cookie są niezbędne do prawidłowego funkcjonowania strony. Nie można ich wyłączyć.",
+                "linkedCategory": "necessary"
+            },
+            {
+                "title": "Analityczne pliki cookie",
+                "description": "Te pliki cookie pomagają nam zrozumieć, jak odwiedzający korzystają z naszej strony, zbierając anonimowe informacje.",
+                "linkedCategory": "analytics"
+            }
+        ]
+    }
+}

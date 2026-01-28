@@ -1,0 +1,21 @@
+{
+    "name": "wireboard-laravel-cmp",
+    "version": "1.0.0",
+    "description": "WireBoard.io consent management platform for Laravel with GA4 support",
+    "private": true,
+    "scripts": {
+        "build": "npm run build:js && npm run build:css",
+        "build:js": "esbuild resources/js/consent-cmp.js --bundle --minify --legal-comments=inline --outfile=dist/js/consent-cmp.min.js && cp resources/js/cookieconsent.umd.js dist/js/cookieconsent.umd.min.js",
+        "build:css": "esbuild resources/css/cookieconsent.css --bundle --minify --legal-comments=inline --outfile=dist/css/cookieconsent.min.css && esbuild resources/css/cookieconsent-theme.css --bundle --minify --legal-comments=inline --outfile=dist/css/cookieconsent-theme.min.css",
+        "dev": "npm run dev:js && npm run dev:css",
+        "dev:js": "esbuild resources/js/consent-cmp.js --bundle --outfile=dist/js/consent-cmp.min.js && cp resources/js/cookieconsent.umd.js dist/js/cookieconsent.umd.min.js",
+        "dev:css": "cp resources/css/cookieconsent.css dist/css/cookieconsent.min.css && cp resources/css/cookieconsent-theme.css dist/css/cookieconsent-theme.min.css",
+        "watch": "npm-run-all --parallel watch:*",
+        "watch:js": "esbuild resources/js/consent-cmp.js --bundle --watch --outfile=dist/js/consent-cmp.min.js",
+        "watch:css": "esbuild resources/css/cookieconsent-theme.css --bundle --watch --outfile=dist/css/cookieconsent-theme.min.css"
+    },
+    "devDependencies": {
+        "esbuild": "^0.20.0",
+        "npm-run-all": "^4.1.5"
+    }
+}

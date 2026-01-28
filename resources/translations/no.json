@@ -1,0 +1,26 @@
+{
+    "consentModal": {
+        "title": "Vi bruker informasjonskapsler",
+        "description": "Vi bruker informasjonskapsler og lignende teknologier for å forbedre din opplevelse og analysere trafikk. Du kan velge dine preferanser nedenfor.",
+        "acceptAllBtn": "Godta alle",
+        "showPreferencesBtn": "Administrer preferanser"
+    },
+    "preferencesModal": {
+        "title": "Preferanser for informasjonskapsler",
+        "acceptAllBtn": "Godta alle",
+        "savePreferencesBtn": "Lagre preferanser",
+        "closeIconLabel": "Lukk",
+        "sections": [
+            {
+                "title": "Nødvendige informasjonskapsler",
+                "description": "Disse informasjonskapslene er essensielle for at nettstedet skal fungere korrekt. De kan ikke deaktiveres.",
+                "linkedCategory": "necessary"
+            },
+            {
+                "title": "Analytiske informasjonskapsler",
+                "description": "Disse informasjonskapslene hjelper oss å forstå hvordan besøkende samhandler med nettstedet vårt ved å samle inn anonym informasjon.",
+                "linkedCategory": "analytics"
+            }
+        ]
+    }
+}

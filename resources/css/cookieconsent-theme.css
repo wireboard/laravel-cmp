@@ -1,0 +1,410 @@
+/**
+ * Google-like CMP styling for vanilla-cookieconsent
+ *
+ * @package wireboard/laravel-cmp
+ *
+ * This theme mimics the appearance of Google Funding Choices
+ * for a consistent user experience across different CMP implementations.
+ *
+ * CSS Variables are set dynamically from Laravel config but
+ * can be overridden in this file if needed.
+ */
+
+/* ============================================
+   CSS Variables - Google color scheme defaults
+   These can be overridden via inline styles from config
+   ============================================ */
+.cm {
+    --cc-btn-primary-bg: #1a73e8;
+    --cc-btn-primary-hover-bg: #1557b0;
+    --cc-btn-primary-color: #fff;
+    --cc-btn-secondary-bg: transparent;
+    --cc-btn-secondary-border-color: #dadce0;
+    --cc-btn-secondary-color: #1a73e8;
+    --cc-btn-secondary-hover-bg: #f8f9fa;
+    --cc-modal-border-radius: 8px;
+    --cc-bg: #fff;
+    --cc-text: #202124;
+    --cc-separator-border-color: #e8eaed;
+    --cc-toggle-on-bg: #1a73e8;
+}
+
+/* ============================================
+   Consent Modal Styling
+   ============================================ */
+
+/* Consent modal - wider on desktop */
+.cm--box {
+    max-width: 600px !important;
+    width: 90vw !important;
+    border-radius: var(--cc-modal-border-radius) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Mobile: full width */
+@media (max-width: 768px) {
+    .cm--box {
+        max-width: 95vw !important;
+        width: 95vw !important;
+    }
+}
+
+/* Modal title */
+.cm__title {
+    font-size: 20px !important;
+    font-weight: 500 !important;
+    color: var(--cc-text) !important;
+    margin-bottom: 12px !important;
+}
+
+/* Modal description */
+.cm__desc {
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+    color: #5f6368 !important;
+}
+
+/* ============================================
+   Button Styling - Consent Modal
+   ============================================ */
+
+/* Button layout: [Manage preferences] [Accept all]
+   Using row-reverse: first button (Accept) goes RIGHT, second (Manage) goes LEFT */
+.cm__btn-group--uneven {
+    display: flex !important;
+    flex-direction: row-reverse !important;
+    gap: 12px !important;
+    width: 100% !important;
+    margin-top: 20px !important;
+}
+
+.cm__btn-group--uneven .cm__btn {
+    flex: 1 !important;
+    margin: 0 !important;
+    padding: 10px 24px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+    transition: background-color 0.2s, box-shadow 0.2s !important;
+}
+
+/* Manage preferences button (secondary) - appears on LEFT */
+.cm__btn-group--uneven .cm__btn--secondary {
+    background: var(--cc-btn-secondary-bg) !important;
+    border: 1px solid var(--cc-btn-secondary-border-color) !important;
+    color: var(--cc-btn-secondary-color) !important;
+}
+
+.cm__btn-group--uneven .cm__btn--secondary:hover {
+    background: var(--cc-btn-secondary-hover-bg) !important;
+}
+
+.cm__btn-group--uneven .cm__btn--secondary:focus {
+    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.3) !important;
+}
+
+/* Accept all button (primary) - appears on RIGHT */
+.cm__btn-group--uneven .cm__btn[data-role="all"] {
+    background: var(--cc-btn-primary-bg) !important;
+    border: none !important;
+    color: var(--cc-btn-primary-color) !important;
+}
+
+.cm__btn-group--uneven .cm__btn[data-role="all"]:hover {
+    background: var(--cc-btn-primary-hover-bg) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+}
+
+.cm__btn-group--uneven .cm__btn[data-role="all"]:focus {
+    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.5) !important;
+}
+
+/* Mobile: stack buttons vertically, Accept on top */
+@media (max-width: 480px) {
+    .cm__btn-group--uneven {
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+
+    .cm__btn-group--uneven .cm__btn[data-role="all"] {
+        order: 1; /* Accept button on top */
+    }
+
+    .cm__btn-group--uneven .cm__btn--secondary {
+        order: 2; /* Manage button below */
+    }
+}
+
+/* ============================================
+   Preferences Modal Styling
+   ============================================ */
+
+.pm {
+    border-radius: var(--cc-modal-border-radius) !important;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+}
+
+.pm__header {
+    border-bottom: 1px solid var(--cc-separator-border-color) !important;
+    padding: 20px 24px !important;
+}
+
+.pm__title {
+    font-size: 20px !important;
+    font-weight: 500 !important;
+    color: var(--cc-text) !important;
+}
+
+.pm__close-btn {
+    background: transparent !important;
+    border: none !important;
+    cursor: pointer !important;
+    padding: 8px !important;
+    border-radius: 50% !important;
+    transition: background-color 0.2s !important;
+}
+
+.pm__close-btn:hover {
+    background: rgba(0, 0, 0, 0.05) !important;
+}
+
+.pm__body {
+    padding: 0 !important;
+}
+
+/* ============================================
+   Button Styling - Preferences Modal
+   ============================================ */
+
+/* Button layout: [Save preferences] on LEFT, [Accept all] on RIGHT */
+.pm__btn-group {
+    display: flex !important;
+    flex-direction: row !important;
+    gap: 12px !important;
+    padding: 16px 24px !important;
+    border-top: 1px solid var(--cc-separator-border-color) !important;
+}
+
+.pm__btn {
+    padding: 10px 24px !important;
+    font-size: 14px !important;
+    font-weight: 500 !important;
+    border-radius: 4px !important;
+    cursor: pointer !important;
+    transition: background-color 0.2s, box-shadow 0.2s !important;
+}
+
+.pm__btn[data-role="all"],
+.pm__btn[data-role="save"] {
+    flex: 1 !important;
+}
+
+.pm__btn[data-role="all"] {
+    background: var(--cc-btn-primary-bg) !important;
+    border: none !important;
+    color: var(--cc-btn-primary-color) !important;
+    order: 2; /* Right side */
+}
+
+.pm__btn[data-role="all"]:hover {
+    background: var(--cc-btn-primary-hover-bg) !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
+}
+
+.pm__btn[data-role="all"]:focus {
+    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.5) !important;
+}
+
+.pm__btn[data-role="save"] {
+    background: var(--cc-btn-secondary-bg) !important;
+    border: 1px solid var(--cc-btn-secondary-border-color) !important;
+    color: var(--cc-btn-secondary-color) !important;
+    order: 1; /* Left side */
+}
+
+.pm__btn[data-role="save"]:hover {
+    background: var(--cc-btn-secondary-hover-bg) !important;
+}
+
+.pm__btn[data-role="save"]:focus {
+    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.3) !important;
+}
+
+/* Mobile: stack buttons */
+@media (max-width: 480px) {
+    .pm__btn-group {
+        flex-direction: column !important;
+        gap: 8px !important;
+    }
+
+    .pm__btn[data-role="all"] {
+        order: 1; /* Accept on top */
+    }
+
+    .pm__btn[data-role="save"] {
+        order: 2; /* Save below */
+    }
+}
+
+/* ============================================
+   Section Styling
+   ============================================ */
+
+.pm__section {
+    border-bottom: 1px solid var(--cc-separator-border-color) !important;
+    padding: 16px 24px !important;
+}
+
+.pm__section:last-of-type {
+    border-bottom: none !important;
+}
+
+.pm__section-title-wrapper {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-bottom: 8px !important;
+}
+
+.pm__section-title {
+    font-size: 16px !important;
+    font-weight: 500 !important;
+    color: var(--cc-text) !important;
+}
+
+.pm__section-desc {
+    font-size: 14px !important;
+    line-height: 1.5 !important;
+    color: #5f6368 !important;
+}
+
+/* ============================================
+   Toggle Switch Styling
+   ============================================ */
+
+.pm__section-toggle {
+    position: relative !important;
+}
+
+.pm__section-toggle input {
+    position: absolute !important;
+    opacity: 0 !important;
+    cursor: pointer !important;
+    height: 20px !important;
+    width: 36px !important;
+}
+
+.toggle__icon {
+    width: 36px !important;
+    height: 20px !important;
+    border-radius: 10px !important;
+    background: #b0bec5 !important;
+    position: relative !important;
+    transition: background-color 0.2s !important;
+}
+
+.toggle__icon::after {
+    content: '' !important;
+    position: absolute !important;
+    top: 2px !important;
+    left: 2px !important;
+    width: 16px !important;
+    height: 16px !important;
+    border-radius: 50% !important;
+    background: #fff !important;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
+    transition: transform 0.2s !important;
+}
+
+/* Toggle ON state */
+.pm__section-toggle input:checked ~ .toggle__icon {
+    background: var(--cc-toggle-on-bg, var(--cc-btn-primary-bg)) !important;
+}
+
+.pm__section-toggle input:checked ~ .toggle__icon::after {
+    transform: translateX(16px) !important;
+}
+
+/* Toggle disabled (read-only) */
+.pm__section-toggle input:disabled ~ .toggle__icon {
+    opacity: 0.6 !important;
+    cursor: not-allowed !important;
+}
+
+/* Toggle focus state */
+.pm__section-toggle input:focus ~ .toggle__icon {
+    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.3) !important;
+}
+
+/* ============================================
+   Overlay/Backdrop
+   ============================================ */
+
+.cm--overlay,
+.pm--overlay {
+    background: rgba(0, 0, 0, 0.5) !important;
+}
+
+/* ============================================
+   Animation
+   ============================================ */
+
+.cm,
+.pm {
+    animation: fadeIn 0.2s ease-out !important;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: scale(0.95);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* ============================================
+   Dark Mode Support (optional)
+   ============================================ */
+
+@media (prefers-color-scheme: dark) {
+    .cm--dark,
+    .pm--dark {
+        --cc-bg: #292929;
+        --cc-text: #e8eaed;
+        --cc-btn-secondary-border-color: #5f6368;
+        --cc-btn-secondary-hover-bg: #3c4043;
+        --cc-separator-border-color: #5f6368;
+    }
+
+    .cm--dark .cm__desc,
+    .pm--dark .pm__section-desc {
+        color: #9aa0a6 !important;
+    }
+}
+
+/* ============================================
+   Accessibility
+   ============================================ */
+
+/* Focus visible for keyboard navigation */
+.cm__btn:focus-visible,
+.pm__btn:focus-visible,
+.pm__close-btn:focus-visible {
+    outline: 2px solid var(--cc-btn-primary-bg) !important;
+    outline-offset: 2px !important;
+}
+
+/* Reduced motion */
+@media (prefers-reduced-motion: reduce) {
+    .cm,
+    .pm,
+    .toggle__icon,
+    .toggle__icon::after {
+        animation: none !important;
+        transition: none !important;
+    }
+}

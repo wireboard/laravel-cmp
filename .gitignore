@@ -1,0 +1,12 @@
+/node_modules
+/vendor
+/docs
+package-lock.json
+.phpunit.result.cache
+.DS_Store
+Thumbs.db
+*.log
+.env
+.idea
+.vscode
+.claude

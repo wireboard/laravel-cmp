@@ -1,0 +1,26 @@
+{
+    "consentModal": {
+        "title": "Vi bruger cookies",
+        "description": "Vi bruger cookies og lignende teknologier til at forbedre din oplevelse og analysere trafik. Du kan vælge dine præferencer nedenfor.",
+        "acceptAllBtn": "Accepter alle",
+        "showPreferencesBtn": "Administrer præferencer"
+    },
+    "preferencesModal": {
+        "title": "Cookie-præferencer",
+        "acceptAllBtn": "Accepter alle",
+        "savePreferencesBtn": "Gem præferencer",
+        "closeIconLabel": "Luk",
+        "sections": [
+            {
+                "title": "Nødvendige cookies",
+                "description": "Disse cookies er essentielle for, at hjemmesiden fungerer korrekt. De kan ikke deaktiveres.",
+                "linkedCategory": "necessary"
+            },
+            {
+                "title": "Analytiske cookies",
+                "description": "Disse cookies hjælper os med at forstå, hvordan besøgende interagerer med vores hjemmeside ved at indsamle anonyme oplysninger.",
+                "linkedCategory": "analytics"
+            }
+        ]
+    }
+}

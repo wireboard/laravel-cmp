@@ -1,0 +1,45 @@
+{
+    "name": "wireboard/laravel-cmp",
+    "description": "WireBoard.io consent management platform for Laravel - GDPR/TCF 2.0 compliant CMP with GA4 and Google Funding Choices support",
+    "keywords": ["laravel", "gdpr", "consent", "cmp", "cookie-consent", "analytics", "privacy", "wireboard", "tcf", "ga4"],
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "WireBoard",
+            "email": "dev@wireboard.io"
+        }
+    ],
+    "require": {
+        "php": "^8.1",
+        "illuminate/support": "^10.0|^11.0|^12.0"
+    },
+    "require-dev": {
+        "orchestra/testbench": "^8.0|^9.0|^10.0",
+        "phpunit/phpunit": "^10.0|^11.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "Wireboard\\Cmp\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Wireboard\\Cmp\\Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Wireboard\\Cmp\\CmpServiceProvider"
+            ],
+            "aliases": {
+                "Cmp": "Wireboard\\Cmp\\Facades\\Cmp"
+            }
+        }
+    },
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "stable",
+    "prefer-stable": true
+}
