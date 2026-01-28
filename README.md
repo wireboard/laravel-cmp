@@ -298,6 +298,9 @@ if (Cmp::isGa4Enabled()) {
 $config = Cmp::getConfig();
 ```
 
+## Version
+v1.0.0
+
 ## Credits
 
 This package includes the following open-source software:
