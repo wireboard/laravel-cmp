@@ -3,11 +3,13 @@
         "title": "Vi bruker informasjonskapsler",
         "description": "Vi bruker informasjonskapsler og lignende teknologier for å forbedre din opplevelse og analysere trafikk. Du kan velge dine preferanser nedenfor.",
         "acceptAllBtn": "Godta alle",
+        "acceptNecessaryBtn": "Avvis alle",
         "showPreferencesBtn": "Administrer preferanser"
     },
     "preferencesModal": {
         "title": "Preferanser for informasjonskapsler",
         "acceptAllBtn": "Godta alle",
+        "acceptNecessaryBtn": "Avvis alle",
         "savePreferencesBtn": "Lagre preferanser",
         "closeIconLabel": "Lukk",
         "sections": [

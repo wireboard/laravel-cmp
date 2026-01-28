@@ -58,6 +58,22 @@
      * Initialize CookieConsent with loaded translations
      */
     function initializeCookieConsent(translation, locale, config) {
+        // Remove reject button if disabled in config
+        if (config.showRejectButton === false) {
+            if (translation.consentModal) {
+                delete translation.consentModal.acceptNecessaryBtn;
+            }
+            if (translation.preferencesModal) {
+                delete translation.preferencesModal.acceptNecessaryBtn;
+            }
+        }
+
+        // Add legal links footer if URLs provided
+        var footerLinks = buildFooterLinks(config, locale);
+        if (footerLinks && translation.consentModal) {
+            translation.consentModal.footer = footerLinks;
+        }
+
         // Build translations object
         var translations = {};
         translations[locale] = translation;
@@ -65,10 +81,10 @@
         // Build categories from config
         var categories = buildCategories(config.categories || {});
 
-        // GUI options from config
+        // GUI options from config (PHP uses snake_case)
         var guiOptions = config.guiOptions || {};
-        var consentModal = guiOptions.consentModal || {};
-        var preferencesModal = guiOptions.preferencesModal || {};
+        var consentModal = guiOptions.consent_modal || guiOptions.consentModal || {};
+        var preferencesModal = guiOptions.preferences_modal || guiOptions.preferencesModal || {};
 
         // Initialize CookieConsent
         CookieConsent.run({
@@ -88,19 +104,19 @@
                 translations: translations
             },
 
-            // GUI Options - Google-like centered modal
+            // GUI Options - respect user config, default to library defaults
             guiOptions: {
                 consentModal: {
                     layout: consentModal.layout || 'box inline',
                     position: consentModal.position || 'middle center',
-                    equalWeightButtons: consentModal.equalWeightButtons !== false,
-                    flipButtons: consentModal.flipButtons !== false
+                    equalWeightButtons: consentModal.equal_weight_buttons === true || consentModal.equalWeightButtons === true,
+                    flipButtons: consentModal.flip_buttons === true || consentModal.flipButtons === true
                 },
                 preferencesModal: {
                     layout: preferencesModal.layout || 'box',
                     position: preferencesModal.position || 'middle center',
-                    equalWeightButtons: preferencesModal.equalWeightButtons !== false,
-                    flipButtons: preferencesModal.flipButtons !== false
+                    equalWeightButtons: preferencesModal.equal_weight_buttons === true || preferencesModal.equalWeightButtons === true,
+                    flipButtons: preferencesModal.flip_buttons === true || preferencesModal.flipButtons === true
                 }
             },
 
@@ -111,6 +127,7 @@
             // Callbacks
             onConsent: function(param) {
                 handleConsentChange(param);
+                showSettingsButton(config);
             },
             onChange: function(param) {
                 // Page reload required when analytics preference changes
@@ -122,8 +139,93 @@
                     return;
                 }
                 handleConsentChange(param);
+            },
+            onFirstConsent: function() {
+                showSettingsButton(config);
             }
         });
+
+        // Show settings button if consent was already given
+        if (CookieConsent.validConsent()) {
+            showSettingsButton(config);
+        }
+    }
+
+    /**
+     * Create and show the floating settings button
+     */
+    function showSettingsButton(config) {
+        if (config.showSettingsButton === false) {
+            return;
+        }
+
+        // Check if button already exists
+        if (document.getElementById('cmp-settings-btn')) {
+            document.getElementById('cmp-settings-btn').classList.add('visible');
+            return;
+        }
+
+        // Create button
+        var btn = document.createElement('button');
+        btn.id = 'cmp-settings-btn';
+        btn.className = 'cmp-settings-btn';
+        btn.setAttribute('aria-label', 'Cookie settings');
+        btn.setAttribute('title', 'Cookie settings');
+
+        // Position class
+        var position = config.settingsButtonPosition || 'bottom_left';
+        btn.classList.add(position === 'bottom_right' ? 'bottom-right' : 'bottom-left');
+
+        // Cookie icon SVG
+        btn.innerHTML = '<svg viewBox="0 0 550 550" xmlns="http://www.w3.org/2000/svg"><path d="M428.9,181.5c-6.1,6.9-13.1,10.9-20.9,11.8c-10.8,1.3-20.2-3.6-25.3-7c-6.8,10.4-15.1,16.4-24.7,18c-1.8,0.3-3.5,0.4-5.2,0.4c-12.4,0-22.7-7.1-26.5-10c-13.3,1.1-24-2.1-31.9-9.4c-9.4-8.7-12.2-21.1-13-28.3c-12.5,3.3-23.1,2.6-31.4-2.3c-9.2-5.4-12.9-14.4-14.1-18.6c-18-8.4-25-20.7-27.4-31.1C142,132,97.8,197.4,97.8,269.4c0,97.7,79.5,177.2,177.2,177.2s177.2-79.5,177.2-177.2C452.2,238.4,444.2,208.1,428.9,181.5z M201.1,323.2c-7.3,0-13.2-5.9-13.2-13.2s5.9-13.2,13.2-13.2c7.3,0,13.2,5.9,13.2,13.2S208.4,323.2,201.1,323.2z M201.1,237.3c-13,0-23.5-10.5-23.5-23.5s10.5-23.5,23.5-23.5s23.5,10.5,23.5,23.5S214.1,237.3,201.1,237.3z M264.1,418.2c-11.7,0-21.2-9.5-21.2-21.2s9.5-21.2,21.2-21.2c11.7,0,21.2,9.5,21.2,21.2C285.3,408.8,275.8,418.2,264.1,418.2z M288.2,306c-7.3,0-13.2-5.9-13.2-13.2c0-7.3,5.9-13.2,13.2-13.2c7.3,0,13.2,5.9,13.2,13.2C301.4,300.1,295.4,306,288.2,306z M385.5,354.1c-13,0-23.5-10.5-23.5-23.5s10.5-10.5,23.5-23.5s23.5,10.5,23.5,23.5S398.5,354.1,385.5,354.1z"/></svg>';
+
+        // Click handler
+        btn.addEventListener('click', function() {
+            CookieConsent.showPreferences();
+        });
+
+        document.body.appendChild(btn);
+
+        // Fade in after a short delay
+        setTimeout(function() {
+            btn.classList.add('visible');
+        }, 100);
+    }
+
+    /**
+     * Build footer links HTML for legal pages
+     */
+    function buildFooterLinks(config, locale) {
+        var links = [];
+
+        // Get localized link texts
+        var linkTexts = {
+            en: { privacy: 'Privacy Policy', terms: 'Terms of Service' },
+            fr: { privacy: 'Politique de confidentialité', terms: 'Conditions d\'utilisation' },
+            de: { privacy: 'Datenschutzrichtlinie', terms: 'Nutzungsbedingungen' },
+            es: { privacy: 'Política de privacidad', terms: 'Términos de servicio' },
+            it: { privacy: 'Informativa sulla privacy', terms: 'Termini di servizio' },
+            nl: { privacy: 'Privacybeleid', terms: 'Servicevoorwaarden' },
+            pt: { privacy: 'Política de privacidade', terms: 'Termos de serviço' },
+            pl: { privacy: 'Polityka prywatności', terms: 'Warunki usługi' },
+            da: { privacy: 'Privatlivspolitik', terms: 'Servicevilkår' },
+            sv: { privacy: 'Integritetspolicy', terms: 'Användarvillkor' },
+            no: { privacy: 'Personvernerklæring', terms: 'Tjenestevilkår' },
+            fi: { privacy: 'Tietosuojakäytäntö', terms: 'Käyttöehdot' },
+            hu: { privacy: 'Adatvédelmi irányelvek', terms: 'Szolgáltatási feltételek' }
+        };
+
+        var texts = linkTexts[locale] || linkTexts.en;
+
+        if (config.privacyPolicyUrl) {
+            links.push('<a href="' + config.privacyPolicyUrl + '" target="_blank" class="cmp-legal-link">' + texts.privacy + '</a>');
+        }
+
+        if (config.termsUrl) {
+            links.push('<a href="' + config.termsUrl + '" target="_blank" class="cmp-legal-link">' + texts.terms + '</a>');
+        }
+
+        return links.length > 0 ? '<span class="cmp-legal-links">' + links.join('') + '</span>' : null;
     }
 
     /**

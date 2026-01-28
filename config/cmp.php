@@ -52,7 +52,7 @@ return [
     */
     'wireboard' => [
         'enabled' => env('CMP_WIREBOARD_ENABLED', false),
-        'pipeline' => env('CMP_WIREBOARD_PIPELINE', 'pipeline-0.wireboard.io'),
+        'pipeline' => env('CMP_WIREBOARD_PIPELINE', 'pipeline-0.collector.wireboard.io'),
         'app_id' => env('CMP_WIREBOARD_APP_ID'),
         'publisher' => env('CMP_WIREBOARD_PUBLISHER'),
         'js_url' => env('CMP_WIREBOARD_JS_URL', 'https://static.wireboard.io/wireboard.js'),
@@ -114,8 +114,13 @@ return [
         |
         | Customize how buttons appear in the consent and preferences modals.
         |
-        | Consent Modal Default:     [Manage preferences] [Accept all]
-        | Preferences Modal Default: [Save preferences]   [Accept all]
+        | With show_reject_button enabled:
+        |   Consent Modal:     [Reject all] [Manage preferences] [Accept all]
+        |   Preferences Modal: [Reject all] [Save preferences]   [Accept all]
+        |
+        | With show_reject_button disabled:
+        |   Consent Modal:     [Manage preferences] [Accept all]
+        |   Preferences Modal: [Save preferences]   [Accept all]
         |
         */
         'gui_options' => [
@@ -132,6 +137,42 @@ return [
                 'flip_buttons' => true,
             ],
         ],
+
+        /*
+        |----------------------------------------------------------------------
+        | Show Reject Button
+        |----------------------------------------------------------------------
+        |
+        | When enabled, shows a "Reject all" button on both modals.
+        | This allows users to quickly reject all non-essential cookies.
+        |
+        */
+        'show_reject_button' => true,
+
+        /*
+        |----------------------------------------------------------------------
+        | Floating Settings Button
+        |----------------------------------------------------------------------
+        |
+        | When enabled, shows a floating cookie icon button after the user
+        | has made their consent choice. Clicking it reopens the preferences.
+        |
+        */
+        'show_settings_button' => true,
+        'settings_button_position' => 'bottom_left', // 'bottom_left' or 'bottom_right'
+
+        /*
+        |----------------------------------------------------------------------
+        | Legal Links
+        |----------------------------------------------------------------------
+        |
+        | Add links to your privacy policy and terms of service.
+        | These will appear in the footer of the consent modal.
+        | Leave empty or null to hide.
+        |
+        */
+        'privacy_policy_url' => null,
+        'terms_url' => null,
 
         /*
         |----------------------------------------------------------------------
@@ -168,7 +209,7 @@ return [
                     '/^_ga/',       // Google Analytics
                     '_gid',         // Google Analytics
                     '/^_wb_/',      // WireBoard
-                    '/^_sp_/',      // Snowplow/WireBoard
+                    '/^_sp_/',      // WireBoard (previous versions)
                 ],
             ],
             // Uncomment to add marketing cookies category:

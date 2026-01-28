@@ -3,11 +3,13 @@
         "title": "Wij gebruiken cookies",
         "description": "Wij gebruiken cookies en soortgelijke technologieën om uw ervaring te verbeteren en het verkeer te analyseren. U kunt hieronder uw voorkeuren kiezen.",
         "acceptAllBtn": "Alles accepteren",
+        "acceptNecessaryBtn": "Alles weigeren",
         "showPreferencesBtn": "Voorkeuren beheren"
     },
     "preferencesModal": {
         "title": "Cookie-voorkeuren",
         "acceptAllBtn": "Alles accepteren",
+        "acceptNecessaryBtn": "Alles weigeren",
         "savePreferencesBtn": "Voorkeuren opslaan",
         "closeIconLabel": "Sluiten",
         "sections": [

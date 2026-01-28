@@ -3,11 +3,13 @@
         "title": "Vi använder cookies",
         "description": "Vi använder cookies och liknande tekniker för att förbättra din upplevelse och analysera trafik. Du kan välja dina preferenser nedan.",
         "acceptAllBtn": "Acceptera alla",
+        "acceptNecessaryBtn": "Avvisa alla",
         "showPreferencesBtn": "Hantera preferenser"
     },
     "preferencesModal": {
         "title": "Cookie-preferenser",
         "acceptAllBtn": "Acceptera alla",
+        "acceptNecessaryBtn": "Avvisa alla",
         "savePreferencesBtn": "Spara preferenser",
         "closeIconLabel": "Stäng",
         "sections": [

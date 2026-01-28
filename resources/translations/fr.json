@@ -3,11 +3,13 @@
         "title": "Nous utilisons des cookies",
         "description": "Nous utilisons des cookies et des technologies similaires pour améliorer votre expérience et analyser le trafic. Vous pouvez choisir vos préférences ci-dessous.",
         "acceptAllBtn": "Tout accepter",
+        "acceptNecessaryBtn": "Tout refuser",
         "showPreferencesBtn": "Gérer les préférences"
     },
     "preferencesModal": {
         "title": "Préférences de cookies",
         "acceptAllBtn": "Tout accepter",
+        "acceptNecessaryBtn": "Tout refuser",
         "savePreferencesBtn": "Enregistrer les préférences",
         "closeIconLabel": "Fermer",
         "sections": [

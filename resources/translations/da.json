@@ -3,11 +3,13 @@
         "title": "Vi bruger cookies",
         "description": "Vi bruger cookies og lignende teknologier til at forbedre din oplevelse og analysere trafik. Du kan vælge dine præferencer nedenfor.",
         "acceptAllBtn": "Accepter alle",
+        "acceptNecessaryBtn": "Afvis alle",
         "showPreferencesBtn": "Administrer præferencer"
     },
     "preferencesModal": {
         "title": "Cookie-præferencer",
         "acceptAllBtn": "Accepter alle",
+        "acceptNecessaryBtn": "Afvis alle",
         "savePreferencesBtn": "Gem præferencer",
         "closeIconLabel": "Luk",
         "sections": [

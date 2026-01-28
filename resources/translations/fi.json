@@ -3,11 +3,13 @@
         "title": "Käytämme evästeitä",
         "description": "Käytämme evästeitä ja vastaavia teknologioita parantaaksemme kokemustasi ja analysoidaksemme liikennettä. Voit valita asetuksesi alla.",
         "acceptAllBtn": "Hyväksy kaikki",
+        "acceptNecessaryBtn": "Hylkää kaikki",
         "showPreferencesBtn": "Hallitse asetuksia"
     },
     "preferencesModal": {
         "title": "Evästeasetukset",
         "acceptAllBtn": "Hyväksy kaikki",
+        "acceptNecessaryBtn": "Hylkää kaikki",
         "savePreferencesBtn": "Tallenna asetukset",
         "closeIconLabel": "Sulje",
         "sections": [

@@ -1,6 +1,6 @@
 {
     "name": "wireboard/laravel-cmp",
-    "description": "WireBoard.io consent management platform for Laravel - GDPR/TCF 2.0 compliant CMP with GA4 and Google Funding Choices support",
+    "description": "Consent management platform for Laravel with WireBoard Analytics, GA4, and Google Funding Choices support",
     "keywords": ["laravel", "gdpr", "consent", "cmp", "cookie-consent", "analytics", "privacy", "wireboard", "tcf", "ga4"],
     "license": "MIT",
     "authors": [

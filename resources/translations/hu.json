@@ -3,11 +3,13 @@
         "title": "Sütiket használunk",
         "description": "Sütiket és hasonló technológiákat használunk az élmény javítása és a forgalom elemzése érdekében. Az alábbi beállításokból választhat.",
         "acceptAllBtn": "Összes elfogadása",
+        "acceptNecessaryBtn": "Összes elutasítása",
         "showPreferencesBtn": "Beállítások kezelése"
     },
     "preferencesModal": {
         "title": "Süti beállítások",
         "acceptAllBtn": "Összes elfogadása",
+        "acceptNecessaryBtn": "Összes elutasítása",
         "savePreferencesBtn": "Beállítások mentése",
         "closeIconLabel": "Bezárás",
         "sections": [

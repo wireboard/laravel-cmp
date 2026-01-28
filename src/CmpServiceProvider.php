@@ -68,9 +68,20 @@ class CmpServiceProvider extends ServiceProvider
 
             // Publish source assets (for custom builds)
             $this->publishes([
-                __DIR__ . '/../resources/js' => resource_path('vendor/cmp/js'),
+                __DIR__ . '/../resources/js/consent-cmp.js' => resource_path('vendor/cmp/js/consent-cmp.js'),
                 __DIR__ . '/../resources/css' => resource_path('vendor/cmp/css'),
             ], 'cmp-source');
+
+            // Publish React components
+            $this->publishes([
+                __DIR__ . '/../resources/js/react/CookiePreferencesLink.tsx' => resource_path('js/components/CookiePreferencesLink.tsx'),
+            ], 'cmp-react');
+
+            // Publish Vue components
+            $this->publishes([
+                __DIR__ . '/../resources/js/vue/CookiePreferencesLink.vue' => resource_path('js/components/CookiePreferencesLink.vue'),
+                __DIR__ . '/../resources/js/vue/useCookieConsent.ts' => resource_path('js/composables/useCookieConsent.ts'),
+            ], 'cmp-vue');
 
             // Publish everything
             $this->publishes([

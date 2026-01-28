@@ -22,7 +22,12 @@
             mode: '{{ $customCmpConfig['mode'] ?? 'opt-in' }}',
             disablePageInteraction: {{ ($customCmpConfig['disable_page_interaction'] ?? true) ? 'true' : 'false' }},
             guiOptions: {!! json_encode($customCmpConfig['gui_options'] ?? []) !!},
-            categories: {!! json_encode($customCmpConfig['categories'] ?? []) !!}
+            categories: {!! json_encode($customCmpConfig['categories'] ?? []) !!},
+            showRejectButton: {{ ($customCmpConfig['show_reject_button'] ?? true) ? 'true' : 'false' }},
+            showSettingsButton: {{ ($customCmpConfig['show_settings_button'] ?? true) ? 'true' : 'false' }},
+            settingsButtonPosition: '{{ $customCmpConfig['settings_button_position'] ?? 'bottom_left' }}',
+            privacyPolicyUrl: {!! json_encode($customCmpConfig['privacy_policy_url'] ?? null) !!},
+            termsUrl: {!! json_encode($customCmpConfig['terms_url'] ?? null) !!}
         };
     </script>
 @endif

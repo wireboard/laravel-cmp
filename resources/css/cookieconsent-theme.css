@@ -14,7 +14,7 @@
    CSS Variables - Google color scheme defaults
    These can be overridden via inline styles from config
    ============================================ */
-.cm {
+#cc-main {
     --cc-btn-primary-bg: #1a73e8;
     --cc-btn-primary-hover-bg: #1557b0;
     --cc-btn-primary-color: #fff;
@@ -25,8 +25,14 @@
     --cc-modal-border-radius: 8px;
     --cc-bg: #fff;
     --cc-text: #202124;
+    --cc-secondary-color: #5f6368;
     --cc-separator-border-color: #e8eaed;
     --cc-toggle-on-bg: #1a73e8;
+    --cc-toggle-off-bg: #b0bec5;
+    --cc-toggle-readonly-bg: #dadce0;
+    --cc-cookie-category-block-bg: #fff;
+    --cc-cookie-category-block-border: #e8eaed;
+    --cc-cookie-category-block-hover-bg: #f8f9fa;
 }
 
 /* ============================================
@@ -34,53 +40,86 @@
    ============================================ */
 
 /* Consent modal - wider on desktop */
-.cm--box {
+#cc-main .cm {
     max-width: 600px !important;
-    width: 90vw !important;
     border-radius: var(--cc-modal-border-radius) !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
 }
 
 /* Mobile: full width */
 @media (max-width: 768px) {
-    .cm--box {
+    #cc-main .cm {
         max-width: 95vw !important;
         width: 95vw !important;
     }
 }
 
 /* Modal title */
-.cm__title {
+#cc-main .cm__title {
     font-size: 20px !important;
     font-weight: 500 !important;
     color: var(--cc-text) !important;
-    margin-bottom: 12px !important;
 }
 
 /* Modal description */
-.cm__desc {
+#cc-main .cm__desc {
     font-size: 14px !important;
     line-height: 1.5 !important;
     color: #5f6368 !important;
+    margin-top: 0.5em !important;
+}
+
+/* Modal footer with legal links */
+#cc-main .cm__footer {
+    padding: 14px 1.3rem !important;
+    border-top: 1px solid var(--cc-separator-border-color) !important;
+    background: #fafafa !important;
+    text-align: center !important;
+}
+
+#cc-main .cm__links {
+    padding: 0 !important;
+    justify-content: center !important;
+}
+
+#cc-main .cm__link-group {
+    font-size: 13px !important;
+    justify-content: center !important;
+    width: auto !important;
+    background: none !important;
+}
+
+/* Custom legal links container */
+#cc-main .cmp-legal-links {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 24px !important;
+}
+
+#cc-main .cmp-legal-link {
+    color: #5f6368 !important;
+    text-decoration: none !important;
+    font-size: 13px !important;
+    background: none !important;
+}
+
+#cc-main .cmp-legal-link:hover {
+    text-decoration: underline !important;
+    color: #1a73e8 !important;
 }
 
 /* ============================================
    Button Styling - Consent Modal
    ============================================ */
 
-/* Button layout: [Manage preferences] [Accept all]
-   Using row-reverse: first button (Accept) goes RIGHT, second (Manage) goes LEFT */
-.cm__btn-group--uneven {
-    display: flex !important;
-    flex-direction: row-reverse !important;
-    gap: 12px !important;
-    width: 100% !important;
-    margin-top: 20px !important;
+/* Button container */
+#cc-main .cm__btns {
+    padding: 1rem 1.3rem !important;
 }
 
-.cm__btn-group--uneven .cm__btn {
-    flex: 1 !important;
-    margin: 0 !important;
+/* Button styling - don't override layout/flex-direction to respect library's layout options */
+#cc-main .cm__btn {
     padding: 10px 24px !important;
     font-size: 14px !important;
     font-weight: 500 !important;
@@ -89,74 +128,70 @@
     transition: background-color 0.2s, box-shadow 0.2s !important;
 }
 
-/* Manage preferences button (secondary) - appears on LEFT */
-.cm__btn-group--uneven .cm__btn--secondary {
+/* Manage preferences button (secondary) */
+#cc-main .cm__btn--secondary {
     background: var(--cc-btn-secondary-bg) !important;
     border: 1px solid var(--cc-btn-secondary-border-color) !important;
     color: var(--cc-btn-secondary-color) !important;
 }
 
-.cm__btn-group--uneven .cm__btn--secondary:hover {
+#cc-main .cm__btn--secondary:hover {
     background: var(--cc-btn-secondary-hover-bg) !important;
 }
 
-.cm__btn-group--uneven .cm__btn--secondary:focus {
+#cc-main .cm__btn--secondary:focus {
     box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.3) !important;
 }
 
-/* Accept all button (primary) - appears on RIGHT */
-.cm__btn-group--uneven .cm__btn[data-role="all"] {
+/* Accept all button (primary) */
+#cc-main .cm__btn[data-role="all"] {
     background: var(--cc-btn-primary-bg) !important;
     border: none !important;
     color: var(--cc-btn-primary-color) !important;
 }
 
-.cm__btn-group--uneven .cm__btn[data-role="all"]:hover {
+#cc-main .cm__btn[data-role="all"]:hover {
     background: var(--cc-btn-primary-hover-bg) !important;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
 }
 
-.cm__btn-group--uneven .cm__btn[data-role="all"]:focus {
+#cc-main .cm__btn[data-role="all"]:focus {
     box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.5) !important;
 }
 
-/* Mobile: stack buttons vertically, Accept on top */
-@media (max-width: 480px) {
-    .cm__btn-group--uneven {
-        flex-direction: column !important;
-        gap: 8px !important;
-    }
+/* Reject/Accept necessary button - same as secondary */
+#cc-main .cm__btn[data-role="necessary"] {
+    background: var(--cc-btn-secondary-bg) !important;
+    border: 1px solid var(--cc-btn-secondary-border-color) !important;
+    color: var(--cc-btn-secondary-color) !important;
+}
 
-    .cm__btn-group--uneven .cm__btn[data-role="all"] {
-        order: 1; /* Accept button on top */
-    }
-
-    .cm__btn-group--uneven .cm__btn--secondary {
-        order: 2; /* Manage button below */
-    }
+#cc-main .cm__btn[data-role="necessary"]:hover {
+    background: var(--cc-btn-secondary-hover-bg) !important;
 }
 
 /* ============================================
    Preferences Modal Styling
    ============================================ */
 
-.pm {
+#cc-main .pm {
     border-radius: var(--cc-modal-border-radius) !important;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15) !important;
+    max-width: 600px !important;
 }
 
-.pm__header {
+#cc-main .pm__header {
     border-bottom: 1px solid var(--cc-separator-border-color) !important;
     padding: 20px 24px !important;
 }
 
-.pm__title {
+#cc-main .pm__title {
     font-size: 20px !important;
     font-weight: 500 !important;
     color: var(--cc-text) !important;
 }
 
-.pm__close-btn {
+#cc-main .pm__close-btn {
     background: transparent !important;
     border: none !important;
     cursor: pointer !important;
@@ -165,28 +200,26 @@
     transition: background-color 0.2s !important;
 }
 
-.pm__close-btn:hover {
+#cc-main .pm__close-btn:hover {
     background: rgba(0, 0, 0, 0.05) !important;
 }
 
-.pm__body {
-    padding: 0 !important;
+#cc-main .pm__body {
+    padding: 16px 24px !important;
 }
 
 /* ============================================
    Button Styling - Preferences Modal
    ============================================ */
 
-/* Button layout: [Save preferences] on LEFT, [Accept all] on RIGHT */
-.pm__btn-group {
-    display: flex !important;
-    flex-direction: row !important;
-    gap: 12px !important;
-    padding: 16px 24px !important;
+#cc-main .pm__footer {
     border-top: 1px solid var(--cc-separator-border-color) !important;
+    padding: 16px 24px !important;
+    background: var(--cc-bg) !important;
 }
 
-.pm__btn {
+/* Don't override flex-direction to respect library's flip_buttons option */
+#cc-main .pm__btn {
     padding: 10px 24px !important;
     font-size: 14px !important;
     font-weight: 500 !important;
@@ -195,175 +228,134 @@
     transition: background-color 0.2s, box-shadow 0.2s !important;
 }
 
-.pm__btn[data-role="all"],
-.pm__btn[data-role="save"] {
-    flex: 1 !important;
-}
-
-.pm__btn[data-role="all"] {
+#cc-main .pm__btn[data-role="all"] {
     background: var(--cc-btn-primary-bg) !important;
     border: none !important;
     color: var(--cc-btn-primary-color) !important;
-    order: 2; /* Right side */
 }
 
-.pm__btn[data-role="all"]:hover {
+#cc-main .pm__btn[data-role="all"]:hover {
     background: var(--cc-btn-primary-hover-bg) !important;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2) !important;
 }
 
-.pm__btn[data-role="all"]:focus {
-    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.5) !important;
-}
-
-.pm__btn[data-role="save"] {
+#cc-main .pm__btn[data-role="save"],
+#cc-main .pm__btn--secondary {
     background: var(--cc-btn-secondary-bg) !important;
     border: 1px solid var(--cc-btn-secondary-border-color) !important;
     color: var(--cc-btn-secondary-color) !important;
-    order: 1; /* Left side */
 }
 
-.pm__btn[data-role="save"]:hover {
+#cc-main .pm__btn[data-role="save"]:hover,
+#cc-main .pm__btn--secondary:hover {
     background: var(--cc-btn-secondary-hover-bg) !important;
 }
 
-.pm__btn[data-role="save"]:focus {
-    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.3) !important;
+/* Reject/Accept necessary button - same as secondary */
+#cc-main .pm__btn[data-role="necessary"] {
+    background: var(--cc-btn-secondary-bg) !important;
+    border: 1px solid var(--cc-btn-secondary-border-color) !important;
+    color: var(--cc-btn-secondary-color) !important;
 }
 
-/* Mobile: stack buttons */
-@media (max-width: 480px) {
-    .pm__btn-group {
-        flex-direction: column !important;
-        gap: 8px !important;
-    }
-
-    .pm__btn[data-role="all"] {
-        order: 1; /* Accept on top */
-    }
-
-    .pm__btn[data-role="save"] {
-        order: 2; /* Save below */
-    }
+#cc-main .pm__btn[data-role="necessary"]:hover {
+    background: var(--cc-btn-secondary-hover-bg) !important;
 }
 
 /* ============================================
    Section Styling
    ============================================ */
 
-.pm__section {
-    border-bottom: 1px solid var(--cc-separator-border-color) !important;
-    padding: 16px 24px !important;
+/* First section (intro text) */
+#cc-main .pm__section:first-child {
+    border: none !important;
+    padding: 0 !important;
+    margin-bottom: 16px !important;
+    background: transparent !important;
 }
 
-.pm__section:last-of-type {
-    border-bottom: none !important;
+/* Category sections with toggles */
+#cc-main .pm__section--toggle {
+    background: var(--cc-bg) !important;
+    border: 1px solid var(--cc-separator-border-color) !important;
+    border-radius: 8px !important;
+    margin-bottom: 12px !important;
+    overflow: hidden !important;
 }
 
-.pm__section-title-wrapper {
-    display: flex !important;
-    align-items: center !important;
-    justify-content: space-between !important;
-    margin-bottom: 8px !important;
+#cc-main .pm__section--toggle .pm__section-title {
+    background: var(--cc-bg) !important;
+    border: none !important;
+    padding: 16px 60px 16px 16px !important;
+    min-height: auto !important;
 }
 
-.pm__section-title {
-    font-size: 16px !important;
+#cc-main .pm__section--toggle .pm__section-title:hover {
+    background: var(--cc-cookie-category-block-hover-bg) !important;
+}
+
+#cc-main .pm__section-title {
+    font-size: 15px !important;
     font-weight: 500 !important;
     color: var(--cc-text) !important;
 }
 
-.pm__section-desc {
+#cc-main .pm__section-desc {
     font-size: 14px !important;
     line-height: 1.5 !important;
-    color: #5f6368 !important;
+    color: var(--cc-secondary-color) !important;
+    padding: 12px 16px 16px !important;
+}
+
+#cc-main .pm__section--toggle .pm__section-desc-wrapper {
+    border-top: 1px solid var(--cc-separator-border-color) !important;
+}
+
+/* Hide the expand arrow for cleaner look */
+#cc-main .pm__section-arrow {
+    display: none !important;
+}
+
+/* Toggle position adjustment */
+#cc-main .section__toggle-wrapper {
+    right: 16px !important;
 }
 
 /* ============================================
    Toggle Switch Styling
    ============================================ */
 
-.pm__section-toggle {
-    position: relative !important;
+/* Hide the checkmark/X icons inside toggle - we want a clean Google-style toggle */
+#cc-main .toggle__icon-on,
+#cc-main .toggle__icon-off {
+    display: none !important;
 }
 
-.pm__section-toggle input {
-    position: absolute !important;
-    opacity: 0 !important;
-    cursor: pointer !important;
-    height: 20px !important;
-    width: 36px !important;
-}
-
-.toggle__icon {
-    width: 36px !important;
-    height: 20px !important;
-    border-radius: 10px !important;
+/* Toggle track styling */
+#cc-main .toggle__icon {
     background: #b0bec5 !important;
-    position: relative !important;
-    transition: background-color 0.2s !important;
-}
-
-.toggle__icon::after {
-    content: '' !important;
-    position: absolute !important;
-    top: 2px !important;
-    left: 2px !important;
-    width: 16px !important;
-    height: 16px !important;
-    border-radius: 50% !important;
-    background: #fff !important;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3) !important;
-    transition: transform 0.2s !important;
+    box-shadow: none !important;
 }
 
 /* Toggle ON state */
-.pm__section-toggle input:checked ~ .toggle__icon {
-    background: var(--cc-toggle-on-bg, var(--cc-btn-primary-bg)) !important;
-}
-
-.pm__section-toggle input:checked ~ .toggle__icon::after {
-    transform: translateX(16px) !important;
+#cc-main .section__toggle:checked ~ .toggle__icon {
+    background: var(--cc-toggle-on-bg) !important;
+    box-shadow: none !important;
 }
 
 /* Toggle disabled (read-only) */
-.pm__section-toggle input:disabled ~ .toggle__icon {
-    opacity: 0.6 !important;
-    cursor: not-allowed !important;
-}
-
-/* Toggle focus state */
-.pm__section-toggle input:focus ~ .toggle__icon {
-    box-shadow: 0 0 0 2px rgba(26, 115, 232, 0.3) !important;
+#cc-main .section__toggle:checked:disabled ~ .toggle__icon {
+    background: var(--cc-toggle-readonly-bg) !important;
+    box-shadow: none !important;
 }
 
 /* ============================================
    Overlay/Backdrop
    ============================================ */
 
-.cm--overlay,
-.pm--overlay {
+#cc-main .cm-wrapper:before,
+#cc-main .pm-overlay {
     background: rgba(0, 0, 0, 0.5) !important;
-}
-
-/* ============================================
-   Animation
-   ============================================ */
-
-.cm,
-.pm {
-    animation: fadeIn 0.2s ease-out !important;
-}
-
-@keyframes fadeIn {
-    from {
-        opacity: 0;
-        transform: scale(0.95);
-    }
-    to {
-        opacity: 1;
-        transform: scale(1);
-    }
 }
 
 /* ============================================
@@ -371,18 +363,13 @@
    ============================================ */
 
 @media (prefers-color-scheme: dark) {
-    .cm--dark,
-    .pm--dark {
+    #cc-main.cc--darkmode {
         --cc-bg: #292929;
         --cc-text: #e8eaed;
+        --cc-secondary-color: #9aa0a6;
         --cc-btn-secondary-border-color: #5f6368;
         --cc-btn-secondary-hover-bg: #3c4043;
         --cc-separator-border-color: #5f6368;
-    }
-
-    .cm--dark .cm__desc,
-    .pm--dark .pm__section-desc {
-        color: #9aa0a6 !important;
     }
 }
 
@@ -391,20 +378,79 @@
    ============================================ */
 
 /* Focus visible for keyboard navigation */
-.cm__btn:focus-visible,
-.pm__btn:focus-visible,
-.pm__close-btn:focus-visible {
+#cc-main .cm__btn:focus-visible,
+#cc-main .pm__btn:focus-visible,
+#cc-main .pm__close-btn:focus-visible {
     outline: 2px solid var(--cc-btn-primary-bg) !important;
     outline-offset: 2px !important;
 }
 
 /* Reduced motion */
 @media (prefers-reduced-motion: reduce) {
-    .cm,
-    .pm,
-    .toggle__icon,
-    .toggle__icon::after {
+    #cc-main .cm,
+    #cc-main .pm,
+    #cc-main .toggle__icon {
         animation: none !important;
         transition: none !important;
     }
+}
+
+/* ============================================
+   Floating Settings Button
+   ============================================ */
+
+.cmp-settings-btn {
+    position: fixed;
+    bottom: 20px;
+    z-index: 2147483646;
+    width: 50px;
+    height: 50px;
+    border-radius: 50%;
+    background: #1a73e8;
+    border: none;
+    cursor: pointer;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, opacity 0.3s ease;
+    opacity: 0;
+    visibility: hidden;
+    padding: 0;
+}
+
+.cmp-settings-btn.visible {
+    opacity: 1;
+    visibility: visible;
+}
+
+.cmp-settings-btn.bottom-left {
+    left: 20px;
+}
+
+.cmp-settings-btn.bottom-right {
+    right: 20px;
+}
+
+.cmp-settings-btn:hover {
+    transform: scale(1.1);
+    box-shadow: 0 6px 16px rgba(0, 0, 0, 0.2);
+}
+
+.cmp-settings-btn:focus {
+    outline: 2px solid var(--cc-btn-primary-bg, #1a73e8);
+    outline-offset: 2px;
+}
+
+.cmp-settings-btn svg {
+    width: 38px;
+    height: 38px;
+    fill: var(--cc-btn-primary-color, #fff);
+}
+
+/* Hide button when modal is open */
+.show--consent .cmp-settings-btn,
+.show--preferences .cmp-settings-btn {
+    opacity: 0 !important;
+    visibility: hidden !important;
 }
