@@ -46,16 +46,19 @@ return [
     | WireBoard Analytics
     |--------------------------------------------------------------------------
     |
-    | WireBoard runs in cookieless mode without consent (Legitimate Interest).
-    | When user grants consent, it upgrades to use cookies/localStorage.
+    | WireBoard can run in two loading modes:
+    | - 'cookieless_first': Load immediately in cookieless mode, upgrade after consent
+    | - 'consent_required': Only load after user grants analytics consent (like GA4)
     |
     */
     'wireboard' => [
         'enabled' => env('CMP_WIREBOARD_ENABLED', false),
+        'loading_mode' => env('CMP_WIREBOARD_LOADING_MODE', 'cookieless_first'), // 'cookieless_first' or 'consent_required'
         'pipeline' => env('CMP_WIREBOARD_PIPELINE', 'pipeline-0.collector.wireboard.io'),
         'app_id' => env('CMP_WIREBOARD_APP_ID'),
         'publisher' => env('CMP_WIREBOARD_PUBLISHER'),
         'js_url' => env('CMP_WIREBOARD_JS_URL', 'https://static.wireboard.io/wireboard.js'),
+        'load_events_script' => env('CMP_WIREBOARD_LOAD_EVENTS', false), // Load events.min.js for automatic event tracking
         'events_js_url' => env('CMP_WIREBOARD_EVENTS_JS_URL', 'https://static.wireboard.io/events.min.js'),
         'initialization_timeout' => 2000, // ms - fallback timeout if no consent interaction
     ],

@@ -9,6 +9,7 @@ use Wireboard\Cmp\View\Components\ConsentMode;
 use Wireboard\Cmp\View\Components\ConsentTracker;
 use Wireboard\Cmp\View\Components\CookiePreferencesLink;
 use Wireboard\Cmp\View\Components\GoogleAnalytics;
+use Wireboard\Cmp\View\Components\OnConsent;
 use Wireboard\Cmp\View\Components\Scripts;
 use Wireboard\Cmp\View\Components\WireBoard;
 
@@ -112,6 +113,7 @@ class CmpServiceProvider extends ServiceProvider
         Blade::component('cmp-google-analytics', GoogleAnalytics::class);
         Blade::component('cmp-wireboard', WireBoard::class);
         Blade::component('cmp-cookie-preferences-link', CookiePreferencesLink::class);
+        Blade::component('cmp-on-consent', OnConsent::class);
         Blade::component('cmp-scripts', Scripts::class);
 
         // Register components with cmp:: prefix for namespaced usage

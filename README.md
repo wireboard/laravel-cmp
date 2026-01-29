@@ -11,7 +11,8 @@ A consent management platform for Laravel with support for [WireBoard Analytics]
 - **Consent Mode v2** - All storage types denied by default until user consent
 - **Flexible CMP Options** - Google Funding Choices (for AdSense sites) or vanilla-cookieconsent (custom CMP)
 - **Google Analytics 4** - Consent-gated loading (only loads after user consent)
-- **[WireBoard Analytics](https://wireboard.io)** - Cookieless mode by default
+- **[WireBoard Analytics](https://wireboard.io)** - Configurable loading mode (cookieless first or consent required)
+- **Third-Party Scripts** - Load any analytics/marketing scripts after consent with `<x-cmp::on-consent>`
 - **Fully Configurable** - Theme colors, button layouts, cookie categories, languages
 - **Reject All Button** - Optional "Reject all" button for quick opt-out
 - **Floating Settings Button** - Cookie icon button to reopen preferences after consent
@@ -63,9 +64,10 @@ CMP_ADSENSE_PUB_ID=pub-XXXXXXXXXX
 CMP_GA4_ENABLED=true
 CMP_GA4_ID=G-XXXXXXXXXX
 
-# WireBoard Analytics (legitimate interest, cookieless by default)
+# WireBoard Analytics
 CMP_WIREBOARD_ENABLED=false
-CMP_WIREBOARD_PIPELINE=pipeline-0.collector.wireboard.io  # Default pipeline
+CMP_WIREBOARD_LOADING_MODE=cookieless_first  # 'cookieless_first' or 'consent_required'
+CMP_WIREBOARD_PIPELINE=pipeline-0.collector.wireboard.io
 CMP_WIREBOARD_APP_ID=your-app-id
 CMP_WIREBOARD_PUBLISHER=your-publisher-id
 ```
@@ -176,6 +178,46 @@ const { showPreferences } = useCookieConsent();
 
 > **Note:** These components only work with the Custom CMP. For Google Funding Choices, users manage preferences through Google's built-in UI.
 
+### Third-Party Scripts (On-Consent)
+
+Load any third-party scripts only after the user grants consent. You can use either the Blade component or JavaScript approach.
+
+#### Option 1: Blade Component
+
+```blade
+{{-- Load analytics script after consent --}}
+<x-cmp::on-consent category="analytics">
+    <script src="https://static.getclicky.com/js"></script>
+    <script>try{ clicky.init(123456); }catch(e){}</script>
+</x-cmp::on-consent>
+
+{{-- Load marketing/ads script after consent --}}
+<x-cmp::on-consent category="marketing">
+    <script src="https://example.com/pixel.js"></script>
+</x-cmp::on-consent>
+```
+
+**Built-in category mappings:**
+- `analytics` - Maps to `analytics_storage` consent
+- `marketing` (or `ads`) - Maps to `ad_storage` consent
+
+You can use any category name you define in your `config/cmp.php`. See [Adding a Marketing Category](#adding-a-marketing-category) for a complete example.
+
+#### Option 2: JavaScript Event Listener
+
+```javascript
+window.addEventListener('consent.update', function(e) {
+    if (e.detail.analytics_storage === 'granted') {
+        // Load Clicky, Matomo, Plausible, etc.
+    }
+    if (e.detail.ad_storage === 'granted') {
+        // Load marketing/ads scripts
+    }
+});
+```
+
+Both approaches work with external scripts, inline scripts, and any HTML content.
+
 ## Configuration Options
 
 After publishing the config, edit `config/cmp.php`:
@@ -195,6 +237,30 @@ This setting determines which CMP is used:
     'enabled' => env('CMP_ADSENSE_ENABLED', false),  // true = Google Funding Choices, false = Custom CMP
     'pub_id' => env('CMP_ADSENSE_PUB_ID'),           // Your AdSense publisher ID (pub-XXXXXXXXXX)
 ],
+```
+
+### WireBoard Loading Mode
+
+Choose how WireBoard loads relative to user consent:
+
+```php
+'wireboard' => [
+    'enabled' => true,
+    'loading_mode' => 'cookieless_first', // or 'consent_required'
+    // ...
+],
+```
+
+**Available modes:**
+
+| Mode | Behavior |
+|------|----------|
+| `cookieless_first` | Load immediately in cookieless mode (no cookies/localStorage). Upgrade to full tracking after consent. Best for maximum data collection while respecting privacy. |
+| `consent_required` | Only load after user grants analytics consent (like GA4). No tracking at all until consent. Best for strict privacy compliance. |
+
+```env
+# Set via environment variable
+CMP_WIREBOARD_LOADING_MODE=cookieless_first
 ```
 
 ---
@@ -277,12 +343,14 @@ Links are automatically translated to the user's language.
 
 ### Cookie Categories
 
+The package comes with two default categories: `necessary` and `analytics`. You can customize these and add new ones.
+
 ```php
 'custom_cmp' => [
     'categories' => [
         'necessary' => [
             'enabled' => true,
-            'read_only' => true,  // Cannot be disabled
+            'read_only' => true,  // Cannot be disabled by user
         ],
         'analytics' => [
             'enabled' => true,    // Pre-toggled ON
@@ -292,15 +360,104 @@ Links are automatically translated to the user's language.
                 '_gid',
             ],
         ],
-        // Add marketing category:
-        'marketing' => [
-            'enabled' => false,
-            'read_only' => false,
-            'auto_clear' => ['/^_fbp/', '/^_gcl/'],
-        ],
     ],
 ],
 ```
+
+### Adding a Marketing Category
+
+To add a "Marketing" category for ads, pixels, and tracking scripts:
+
+**Step 1: Add the category in `config/cmp.php`:**
+
+```php
+'categories' => [
+    'necessary' => [
+        'enabled' => true,
+        'read_only' => true,
+    ],
+    'analytics' => [
+        'enabled' => true,
+        'read_only' => false,
+        'auto_clear' => ['/^_ga/', '_gid'],
+    ],
+    // Add marketing category
+    'marketing' => [
+        'enabled' => false,           // Pre-toggled OFF (user must opt-in)
+        'read_only' => false,
+        'auto_clear' => ['/^_fbp/', '/^_gcl/', '/^_fbc/'],  // Facebook, Google Ads cookies
+    ],
+],
+```
+
+**Step 2: Add translations for the new category.**
+
+Publish translations if you haven't already:
+```bash
+php artisan vendor:publish --tag=cmp-translations
+```
+
+Edit `public/vendor/cmp/translations/en.json` and add a section for marketing:
+
+```json
+{
+    "consentModal": {
+        "title": "We use cookies",
+        "description": "We use cookies and similar technologies to improve your experience and analyze traffic.",
+        "acceptAllBtn": "Accept all",
+        "acceptNecessaryBtn": "Reject all",
+        "showPreferencesBtn": "Manage preferences"
+    },
+    "preferencesModal": {
+        "title": "Cookie preferences",
+        "acceptAllBtn": "Accept all",
+        "acceptNecessaryBtn": "Reject all",
+        "savePreferencesBtn": "Save preferences",
+        "closeIconLabel": "Close",
+        "sections": [
+            {
+                "title": "Necessary cookies",
+                "description": "These cookies are essential for the website to function properly.",
+                "linkedCategory": "necessary"
+            },
+            {
+                "title": "Analytics cookies",
+                "description": "These cookies help us understand how visitors interact with our website.",
+                "linkedCategory": "analytics"
+            },
+            {
+                "title": "Marketing cookies",
+                "description": "These cookies are used to deliver personalized ads and track ad performance across websites.",
+                "linkedCategory": "marketing"
+            }
+        ]
+    }
+}
+```
+
+> **Note:** Repeat this for each language file (fr.json, de.json, etc.) you want to support.
+
+**Step 3: Load marketing scripts only after consent:**
+
+```blade
+<x-cmp::on-consent category="marketing">
+    <!-- Facebook Pixel -->
+    <script>
+        !function(f,b,e,v,n,t,s)
+        {if(f.fbq)return;n=f.fbq=function(){n.callMethod?
+        n.callMethod.apply(n,arguments):n.queue.push(arguments)};
+        if(!f._fbq)f._fbq=n;n.push=n;n.loaded=!0;n.version='2.0';
+        n.queue=[];t=b.createElement(e);t.async=!0;
+        t.src=v;s=b.getElementsByTagName(e)[0];
+        s.parentNode.insertBefore(t,s)}(window, document,'script',
+        'https://connect.facebook.net/en_US/fbevents.js');
+        fbq('init', 'YOUR_PIXEL_ID');
+        fbq('track', 'PageView');
+    </script>
+</x-cmp::on-consent>
+```
+
+The `marketing` category automatically maps to `ad_storage` in Google Consent Mode v2.
 
 ### Adding Languages
 
@@ -444,10 +601,17 @@ This package loads GA4 only after explicit user consent because:
 - **Real-time analytics** - See your data as it happens
 - **Lightweight** - Minimal impact on page performance
 
-In this package, WireBoard is configured in cookieless mode by default:
-- `useCookies: false` - No cookies stored
-- `useLocalStorage: false` - No local storage used
-- Can be configured to upgrade to full tracking after consent
+This package supports two loading modes for WireBoard:
+
+**`cookieless_first` (default):**
+- Loads immediately in cookieless mode (`useCookies: false`, `useLocalStorage: false`)
+- Upgrades to full tracking after user grants consent
+- Best for maximum data collection while respecting privacy
+
+**`consent_required`:**
+- Only loads after user grants analytics consent
+- Full tracking enabled from the start (with consent)
+- Best for strict privacy compliance (like GA4)
 
 Learn more at [wireboard.io](https://wireboard.io).
 
@@ -555,7 +719,7 @@ $config = Cmp::getConfig();
 
 ## Version
 
-v1.1.0
+v1.2.0
 
 ## Credits
 
