@@ -9,18 +9,17 @@ use Wireboard\Cmp\Facades\Cmp;
 /**
  * Consent State Tracker Component
  *
- * Bridges the CMP APIs (Google Funding Choices or vanilla-cookieconsent)
- * to a unified 'consent.update' event that other scripts can listen to.
+ * Initializes global consent state and exposes the updateConsent function
+ * for the Custom CMP to use. Google Funding Choices callbacks are handled
+ * in CmpScript component to avoid race conditions.
  */
 class ConsentTracker extends Component
 {
     public bool $enabled;
-    public string $cmpType;
 
     public function __construct()
     {
         $this->enabled = Cmp::isEnabled();
-        $this->cmpType = Cmp::getCmpType();
     }
 
     public function render(): View|string

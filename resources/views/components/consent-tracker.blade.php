@@ -1,15 +1,22 @@
-{{-- Consent State Tracker - bridges CMP APIs to unified consent.update event --}}
+{{-- Consent State Tracker - bridges Custom CMP to unified consent.update event --}}
+{{--
+    This component initializes the global consent state and exposes the
+    updateConsent function for the Custom CMP to use.
+
+    Note: Google Funding Choices callback handling is done in cmp-script.blade.php
+    to avoid race conditions (callback must be registered before Google FC loads).
+--}}
 <script>
 (function(){
-    // Global consent state
-    window.__consentState = {
+    // Global consent state (may already be initialized by cmp-script for Google CMP)
+    window.__consentState = window.__consentState || {
         ad_storage: 'denied',
         analytics_storage: 'denied',
         ad_user_data: 'denied',
         ad_personalization: 'denied'
     };
 
-    // Function to update consent and notify listeners
+    // Function to update consent and notify listeners (used by Custom CMP)
     function updateConsent(consentValues) {
         if (consentValues.ad_storage === 'GRANTED' || consentValues.ad_storage === 'granted') {
             window.__consentState.ad_storage = 'granted';
@@ -40,51 +47,7 @@
         }));
     }
 
-    @if($cmpType === 'google')
-    // Google Funding Choices callbacks
-    window.googlefc = window.googlefc || {};
-    window.googlefc.callbackQueue = window.googlefc.callbackQueue || [];
-
-    // Register callback for when consent data is ready
-    window.googlefc.callbackQueue.push({
-        CONSENT_DATA_READY: function() {
-            if (typeof window.googlefc.getGoogleConsentModeValues === 'function') {
-                var consentValues = window.googlefc.getGoogleConsentModeValues();
-                updateConsent(consentValues);
-            }
-        }
-    });
-
-    // Fallback: TCF API listener
-    setTimeout(function() {
-        if (typeof window.__tcfapi === 'function') {
-            window.__tcfapi('addEventListener', 2, function(tcData, success) {
-                if (success && tcData.purpose) {
-                    var hasConsent = tcData.purpose.consents && (
-                        tcData.purpose.consents[1] ||
-                        tcData.purpose.consents[7]
-                    );
-
-                    if (hasConsent && (tcData.eventStatus === 'useractioncomplete' || tcData.eventStatus === 'tcloaded')) {
-                        updateConsent({
-                            ad_storage: 'GRANTED',
-                            analytics_storage: 'GRANTED',
-                            ad_user_data: 'GRANTED',
-                            ad_personalization: 'GRANTED'
-                        });
-                    }
-                }
-            });
-        }
-    }, 500);
-    @endif
-
-    // Expose updateConsent for custom CMP
+    // Expose updateConsent for Custom CMP
     window.__cmpUpdateConsent = updateConsent;
 })();
 </script>
-
-@if($cmpType === 'custom')
-{{-- Custom CMP initialization --}}
-<script src="{{ config('cmp.custom_cmp.cmp_js_path', '/vendor/cmp/js/consent-cmp.min.js') }}"></script>
-@endif

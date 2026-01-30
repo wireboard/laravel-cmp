@@ -10,6 +10,7 @@ A consent management platform for Laravel with support for [WireBoard Analytics]
 
 - **Consent Mode v2** - All storage types denied by default until user consent
 - **Flexible CMP Options** - Google Funding Choices (for AdSense sites) or vanilla-cookieconsent (custom CMP)
+- **Automatic Regional Fallback** - Falls back to Custom CMP in regions where Google doesn't show banners (Brazil, South Africa, etc.)
 - **Google Analytics 4** - Consent-gated loading (only loads after user consent)
 - **[WireBoard Analytics](https://wireboard.io)** - Configurable loading mode (cookieless first or consent required)
 - **Third-Party Scripts** - Load any analytics/marketing scripts after consent with `<x-cmp::on-consent>`
@@ -488,8 +489,34 @@ CMP_ADSENSE_PUB_ID=pub-XXXXXXXXXX
 - Required for sites running Google AdSense ads
 - Supports TCF 2.0 / IAB framework
 - Consent choices sync across Google's ad network
+- **Automatic fallback**: In regions where Google doesn't show consent banners (Brazil, South Africa, Thailand, etc.), the package automatically falls back to the Custom CMP to ensure users can still grant consent
 
 **Best for:** Sites monetized with Google AdSense that need Google's certified CMP.
+
+#### Required: Google AdSense Configuration
+
+For Google Funding Choices to work properly with GA4 and other analytics, you **must enable Consent Mode** in your AdSense account:
+
+1. Go to **Google AdSense** → **Privacy & messaging** → **European regulation** (or GDPR)
+2. Enable the following options:
+   - **Enable consent mode for advertising purposes**
+   - **Enable consent mode for analytics purposes**
+3. Save your settings
+
+Without this configuration, the consent signals won't be passed to Google Analytics, and GA4 will never load even after the user grants consent.
+
+> **Note:** You may also need to configure consent messages for other regions (California/CCPA, etc.) depending on your audience.
+
+#### Automatic Fallback for Unsupported Regions
+
+Google Funding Choices only shows consent banners in specific regions (EU, UK, California, etc.). For users in other regions like Brazil (LGPD), South Africa (POPIA), or Thailand (PDPA), Google returns a "not applicable" status and doesn't show any banner.
+
+This package automatically detects this situation and falls back to the Custom CMP (vanilla-cookieconsent) to show a consent banner. This ensures:
+- Users in all regions can grant or deny consent
+- Your site remains compliant with privacy regulations worldwide
+- GA4 and other analytics can load after consent is granted
+
+This fallback is completely automatic - no additional configuration required.
 
 ### Mode 2: Custom CMP (vanilla-cookieconsent)
 
@@ -520,18 +547,20 @@ CMP_ADSENSE_ENABLED=false
 | Legal links (Privacy/Terms) | No | Yes |
 | AdSense compatible | Required | Not needed |
 | TCF 2.0 | Yes | No (Consent Mode v2) |
+| Regional coverage | EU, UK, California only | Worldwide |
+| Automatic fallback | Falls back to Custom CMP | N/A |
 
 ### Consent Flow
 
 ```
 +------------------------------------------------------------------+
-|                           PAGE LOAD                               |
+|                           PAGE LOAD                              |
 +------------------------------------------------------------------+
                                |
                                v
 +------------------------------------------------------------------+
-|  1. CONSENT MODE DEFAULTS                                         |
-|     gtag('consent', 'default', { analytics_storage: 'denied' })   |
+|  1. CONSENT MODE DEFAULTS                                        |
+|     gtag('consent', 'default', { analytics_storage: 'denied' })  |
 +------------------------------------------------------------------+
                                |
                                v
@@ -550,20 +579,20 @@ CMP_ADSENSE_ENABLED=false
                                |
                                v
 +------------------------------------------------------------------+
-|  2. CONSENT MODAL SHOWN (first visit)                             |
-|     User sees: [Reject All] [Manage Preferences] [Accept All]     |
+|  2. CONSENT MODAL SHOWN (first visit)                            |
+|     User sees: [Reject All] [Manage Preferences] [Accept All]    |
 +------------------------------------------------------------------+
                                |
                                v
 +------------------------------------------------------------------+
-|  3. USER MAKES CHOICE                                             |
+|  3. USER MAKES CHOICE                                            |
 +------------------------------------------------------------------+
                                |
                                v
 +------------------------------------------------------------------+
-|  4. CONSENT UPDATE                                                |
-|     - gtag('consent', 'update', {...})                            |
-|     - window.dispatchEvent('consent.update')                      |
+|  4. CONSENT UPDATE                                               |
+|     - gtag('consent', 'update', {...})                           |
+|     - window.dispatchEvent('consent.update')                     |
 +------------------------------------------------------------------+
                                |
                                v
@@ -580,8 +609,8 @@ CMP_ADSENSE_ENABLED=false
                                |
                                v
 +------------------------------------------------------------------+
-|  6. WIREBOARD (if enabled)                                        |
-|     Runs in cookieless mode, can upgrade if consent granted       |
+|  6. WIREBOARD (if enabled)                                       |
+|     Runs in cookieless mode, can upgrade if consent granted      |
 +------------------------------------------------------------------+
 ```
 
@@ -671,6 +700,32 @@ if (window.googlefc && window.googlefc.getGoogleConsentModeValues) {
 // or the Google-provided UI
 ```
 
+### Testing Regional Fallback
+
+To test the automatic fallback to Custom CMP (for regions where Google doesn't show banners):
+
+1. Use a VPN to connect from Brazil, South Africa, Thailand, or another unsupported region
+2. Visit your site - you should see the Custom CMP banner instead of Google's
+3. Check the console for CMP type:
+
+```javascript
+// Should show 'custom' when fallback is active
+console.log('CMP type:', window.__cmpType);
+
+// Check if fallback was triggered
+console.log('Custom CMP initialized:', window.__customCMPInitialized);
+```
+
+**Expected behavior by region:**
+
+| Region | CMP Shown |
+|--------|-----------|
+| EU/UK | Google Funding Choices |
+| California | Google Funding Choices |
+| Brazil | Custom CMP (fallback) |
+| South Africa | Custom CMP (fallback) |
+| Other regions | Custom CMP (fallback) |
+
 ### Verify Analytics Loading
 
 ```javascript
@@ -719,7 +774,7 @@ $config = Cmp::getConfig();
 
 ## Version
 
-v1.2.0
+v1.3.0
 
 ## Credits
 
