@@ -116,27 +116,30 @@ return [
         |----------------------------------------------------------------------
         |
         | Customize how buttons appear in the consent and preferences modals.
+        | "Manage preferences" is styled as a text link (not a button).
+        | On mobile, buttons stack vertically with Accept all on top.
         |
-        | With show_reject_button enabled:
-        |   Consent Modal:     [Reject all] [Manage preferences] [Accept all]
-        |   Preferences Modal: [Reject all] [Save preferences]   [Accept all]
+        | Desktop (show_reject_button = true):
+        |   Consent Modal:      [ Reject all ]  [ Accept all ]
+        |                          Manage preferences
+        |   Preferences Modal:  [ Save preferences ] [ Reject all ] [ Accept all ]
         |
-        | With show_reject_button disabled:
-        |   Consent Modal:     [Manage preferences] [Accept all]
-        |   Preferences Modal: [Save preferences]   [Accept all]
+        | Desktop (show_reject_button = false):
+        |   Consent Modal:      [ Manage preferences ] [ Accept all ]
+        |   Preferences Modal:  [ Save preferences ] [ Accept all ]
         |
         */
         'gui_options' => [
             'consent_modal' => [
                 'layout' => 'box inline',       // 'box', 'box inline', 'cloud', 'bar'
                 'position' => 'middle center',  // 'top', 'middle', 'bottom' + 'left', 'center', 'right'
-                'equal_weight_buttons' => true,
-                'flip_buttons' => true,         // true = [secondary] [primary]
+                'equal_weight_buttons' => false,
+                'flip_buttons' => true,
             ],
             'preferences_modal' => [
                 'layout' => 'box',
                 'position' => 'middle center',
-                'equal_weight_buttons' => true,
+                'equal_weight_buttons' => false,
                 'flip_buttons' => true,
             ],
         ],

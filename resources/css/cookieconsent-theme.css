@@ -54,6 +54,37 @@
     }
 }
 
+/* Mobile: Accept all on top, Reject all below, Manage preferences at bottom */
+@media screen and (max-width: 640px) {
+    /* Override flip's column-reverse for both consent modal and preferences modal */
+    #cc-main .cm--flip .cm__btn-group,
+    #cc-main .cm--flip .cm__btns,
+    #cc-main .pm--flip .pm__btn-group,
+    #cc-main .pm--flip .pm__footer {
+        flex-direction: column !important;
+    }
+    /* Button spacing — consent modal */
+    #cc-main .cm--inline.cm--flip .cm__btn + .cm__btn {
+        margin: 0 !important;
+    }
+    #cc-main .cm--inline.cm--flip .cm__btn-group {
+        gap: .8em !important;
+    }
+    /* Button spacing — preferences modal */
+    #cc-main .pm--flip .pm__btn + .pm__btn,
+    #cc-main .pm--flip .pm__btn-group + .pm__btn-group {
+        margin: 0 !important;
+    }
+    #cc-main .pm--flip .pm__btn-group,
+    #cc-main .pm--flip .pm__footer {
+        gap: .8em !important;
+    }
+    /* Manage preferences link spacing */
+    #cc-main .cm--inline .cm__btn-group + .cm__btn-group {
+        margin: .85em 0 0 !important;
+    }
+}
+
 /* Modal title */
 #cc-main .cm__title {
     font-size: 20px !important;
@@ -116,6 +147,44 @@
 /* Button container */
 #cc-main .cm__btns {
     padding: 1rem 1.3rem !important;
+}
+
+/* Force "Manage preferences" to bottom regardless of flipButtons config */
+#cc-main .cm--flip .cm__btns {
+    flex-direction: column !important;
+}
+
+/* "Manage preferences" styled as a text link (second btn-group) */
+#cc-main .cm__btn-group + .cm__btn-group {
+    text-align: center !important;
+    margin-top: 1.25em !important;
+}
+
+#cc-main .cm__btn-group + .cm__btn-group .cm__btn {
+    background: none !important;
+    border: none !important;
+    color: var(--cc-btn-secondary-color) !important;
+    min-height: auto !important;
+    padding: .3em 0 !important;
+    font-size: .95em !important;
+    text-decoration: none !important;
+}
+
+#cc-main .cm__btn-group + .cm__btn-group .cm__btn:hover {
+    text-decoration: underline !important;
+    background: none !important;
+}
+
+#cc-main .cm__btn-group + .cm__btn-group .cm__btn:focus,
+#cc-main .cm__btn-group + .cm__btn-group .cm__btn:focus-visible {
+    box-shadow: none !important;
+    outline: none !important;
+    background: none !important;
+}
+
+/* Button spacing within first group (inline layout) */
+#cc-main .cm--inline .cm__btn-group {
+    gap: 1.25em !important;
 }
 
 /* Button styling - don't override layout/flex-direction to respect library's layout options */
