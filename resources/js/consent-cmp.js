@@ -60,13 +60,31 @@
                 return fetch(translationsPath + 'en.json').then(function(r) { return r.json(); });
             })
             .then(function(translation) {
-                initializeCookieConsent(translation, currentLocale, config);
+                whenDocumentReady(function() {
+                    initializeCookieConsent(translation, currentLocale, config);
+                });
             })
             .catch(function(error) {
                 console.error('GDPR Consent: Failed to load translations', error);
                 // Initialize with default English strings
-                initializeCookieConsent(getDefaultTranslation(), 'en', config);
+                whenDocumentReady(function() {
+                    initializeCookieConsent(getDefaultTranslation(), 'en', config);
+                });
             });
+
+        /**
+         * Run a callback once document.body exists. The CMP scripts load in
+         * <head>; on fast connections the translation fetch can resolve while
+         * the parser is still in <head>, and CookieConsent.run() would crash
+         * appending the modal to a null document.body.
+         */
+        function whenDocumentReady(callback) {
+            if (document.readyState === 'loading') {
+                document.addEventListener('DOMContentLoaded', callback);
+            } else {
+                callback();
+            }
+        }
 
         /**
          * Initialize CookieConsent with loaded translations
