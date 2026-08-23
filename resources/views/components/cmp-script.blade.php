@@ -96,7 +96,10 @@
                         ad_storage: 'denied',
                         analytics_storage: 'denied',
                         ad_user_data: 'denied',
-                        ad_personalization: 'denied'
+                        ad_personalization: 'denied',
+                        functionality_storage: 'denied',
+                        personalization_storage: 'denied',
+                        security_storage: 'granted'
                     };
 
                     window.__consentState.analytics_storage = granted ? 'granted' : 'denied';

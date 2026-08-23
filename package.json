@@ -1,6 +1,6 @@
 {
     "name": "wireboard-laravel-cmp",
-    "version": "1.4.0",
+    "version": "1.5.0",
     "description": "WireBoard.io consent management platform for Laravel with GA4 support",
     "private": true,
     "scripts": {
@@ -12,10 +12,12 @@
         "dev:css": "cp resources/css/cookieconsent.css dist/css/cookieconsent.min.css && cp resources/css/cookieconsent-theme.css dist/css/cookieconsent-theme.min.css",
         "watch": "npm-run-all --parallel watch:*",
         "watch:js": "esbuild resources/js/consent-cmp.js --bundle --watch --outfile=dist/js/consent-cmp.min.js",
-        "watch:css": "esbuild resources/css/cookieconsent-theme.css --bundle --watch --outfile=dist/css/cookieconsent-theme.min.css"
+        "watch:css": "esbuild resources/css/cookieconsent-theme.css --bundle --watch --outfile=dist/css/cookieconsent-theme.min.css",
+        "update:cookieconsent": "cp node_modules/vanilla-cookieconsent/dist/cookieconsent.umd.js resources/js/cookieconsent.umd.js && cp node_modules/vanilla-cookieconsent/dist/cookieconsent.css resources/css/cookieconsent.css"
     },
     "devDependencies": {
-        "esbuild": "^0.20.0",
-        "npm-run-all": "^4.1.5"
+        "esbuild": "^0.28.2",
+        "npm-run-all": "^4.1.5",
+        "vanilla-cookieconsent": "^3.1.0"
     }
 }

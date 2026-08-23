@@ -265,6 +265,23 @@ return [
         'analytics_storage' => 'denied',
         'ad_user_data' => 'denied',
         'ad_personalization' => 'denied',
+        'functionality_storage' => 'denied',
+        'personalization_storage' => 'denied',
+        'security_storage' => 'granted', // strictly necessary, exempt from consent
         'wait_for_update' => 500, // ms to wait for CMP to load
     ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Consent Mode v2 Behavior
+    |--------------------------------------------------------------------------
+    |
+    | ads_data_redaction: when ad_storage is denied, redact ads click
+    | identifiers (gclid, dclid) from network requests.
+    | url_passthrough: pass ad click information through URLs when cookies
+    | are denied (improves conversion measurement without cookies).
+    |
+    */
+    'ads_data_redaction' => env('CMP_ADS_DATA_REDACTION', true),
+    'url_passthrough' => env('CMP_URL_PASSTHROUGH', false),
 ];

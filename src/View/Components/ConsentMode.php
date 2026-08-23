@@ -17,12 +17,16 @@ class ConsentMode extends Component
     public bool $enabled;
     public string $cmpType;
     public array $defaults;
+    public bool $adsDataRedaction;
+    public bool $urlPassthrough;
 
     public function __construct()
     {
         $this->enabled = Cmp::isEnabled();
         $this->cmpType = Cmp::getCmpType();
         $this->defaults = Cmp::getConsentDefaults();
+        $this->adsDataRedaction = Cmp::isAdsDataRedactionEnabled();
+        $this->urlPassthrough = Cmp::isUrlPassthroughEnabled();
     }
 
     public function render(): View|string

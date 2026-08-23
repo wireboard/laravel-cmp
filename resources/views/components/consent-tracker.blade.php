@@ -13,23 +13,33 @@
         ad_storage: 'denied',
         analytics_storage: 'denied',
         ad_user_data: 'denied',
-        ad_personalization: 'denied'
+        ad_personalization: 'denied',
+        functionality_storage: 'denied',
+        personalization_storage: 'denied',
+        security_storage: 'granted'
     };
 
-    // Function to update consent and notify listeners (used by Custom CMP)
+    var CONSENT_KEYS = [
+        'ad_storage',
+        'analytics_storage',
+        'ad_user_data',
+        'ad_personalization',
+        'functionality_storage',
+        'personalization_storage',
+        'security_storage'
+    ];
+
+    // Function to update consent and notify listeners (used by Custom CMP).
+    // Mirrors granted AND denied so revoking consent downgrades the state.
     function updateConsent(consentValues) {
-        if (consentValues.ad_storage === 'GRANTED' || consentValues.ad_storage === 'granted') {
-            window.__consentState.ad_storage = 'granted';
-        }
-        if (consentValues.analytics_storage === 'GRANTED' || consentValues.analytics_storage === 'granted') {
-            window.__consentState.analytics_storage = 'granted';
-        }
-        if (consentValues.ad_user_data === 'GRANTED' || consentValues.ad_user_data === 'granted') {
-            window.__consentState.ad_user_data = 'granted';
-        }
-        if (consentValues.ad_personalization === 'GRANTED' || consentValues.ad_personalization === 'granted') {
-            window.__consentState.ad_personalization = 'granted';
-        }
+        CONSENT_KEYS.forEach(function (key) {
+            var value = consentValues[key];
+            if (value === 'GRANTED' || value === 'granted') {
+                window.__consentState[key] = 'granted';
+            } else if (value === 'DENIED' || value === 'denied') {
+                window.__consentState[key] = 'denied';
+            }
+        });
 
         // Update Google's consent mode
         if (typeof gtag === 'function') {
@@ -37,7 +47,10 @@
                 ad_storage: window.__consentState.ad_storage,
                 analytics_storage: window.__consentState.analytics_storage,
                 ad_user_data: window.__consentState.ad_user_data,
-                ad_personalization: window.__consentState.ad_personalization
+                ad_personalization: window.__consentState.ad_personalization,
+                functionality_storage: window.__consentState.functionality_storage,
+                personalization_storage: window.__consentState.personalization_storage,
+                security_storage: window.__consentState.security_storage
             });
         }
 

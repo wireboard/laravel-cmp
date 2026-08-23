@@ -8,7 +8,7 @@ A consent management platform for Laravel with support for [WireBoard Analytics]
 
 ## Features
 
-- **Consent Mode v2** - All storage types denied by default until user consent
+- **Consent Mode v2** - The full signal set (`ad_storage`, `analytics_storage`, `ad_user_data`, `ad_personalization`, `functionality_storage`, `personalization_storage`, `security_storage`) denied by default until user consent, with optional `ads_data_redaction` and `url_passthrough`
 - **Flexible CMP Options** - Google Funding Choices (for AdSense sites) or vanilla-cookieconsent (custom CMP)
 - **Automatic Regional Fallback** - Falls back to Custom CMP in regions where Google doesn't show banners (Brazil, South Africa, etc.)
 - **Google Analytics 4** - Consent-gated loading (only loads after user consent)
@@ -23,7 +23,7 @@ A consent management platform for Laravel with support for [WireBoard Analytics]
 ## Requirements
 
 - PHP 8.1+
-- Laravel 10.x, 11.x, or 12.x
+- Laravel 10.x, 11.x, 12.x, or 13.x
 
 ## Installation
 

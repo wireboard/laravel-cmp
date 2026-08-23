@@ -101,8 +101,27 @@ class Cmp
             'analytics_storage' => 'denied',
             'ad_user_data' => 'denied',
             'ad_personalization' => 'denied',
+            'functionality_storage' => 'denied',
+            'personalization_storage' => 'denied',
+            'security_storage' => 'granted',
             'wait_for_update' => 500,
         ];
+    }
+
+    /**
+     * Whether ads data redaction is enabled when ad_storage is denied.
+     */
+    public function isAdsDataRedactionEnabled(): bool
+    {
+        return (bool) ($this->config['ads_data_redaction'] ?? true);
+    }
+
+    /**
+     * Whether URL passthrough of ad click information is enabled.
+     */
+    public function isUrlPassthroughEnabled(): bool
+    {
+        return (bool) ($this->config['url_passthrough'] ?? false);
     }
 
     /**

@@ -350,27 +350,33 @@
                 ? acceptedCategories.indexOf('marketing') !== -1
                 : false;
 
+            // Check if functionality/preferences category is accepted (if exists)
+            var functionalityAccepted = Array.isArray(acceptedCategories)
+                ? (acceptedCategories.indexOf('functionality') !== -1 || acceptedCategories.indexOf('preferences') !== -1)
+                : false;
+
             // Initialize consent state if needed
             window.__consentState = window.__consentState || {
                 ad_storage: 'denied',
                 analytics_storage: 'denied',
                 ad_user_data: 'denied',
-                ad_personalization: 'denied'
+                ad_personalization: 'denied',
+                functionality_storage: 'denied',
+                personalization_storage: 'denied',
+                security_storage: 'granted'
             };
 
             // Update analytics consent
-            if (analyticsAccepted) {
-                window.__consentState.analytics_storage = 'granted';
-            } else {
-                window.__consentState.analytics_storage = 'denied';
-            }
+            window.__consentState.analytics_storage = analyticsAccepted ? 'granted' : 'denied';
 
-            // Update ad consent (if marketing category exists)
-            if (marketingAccepted) {
-                window.__consentState.ad_storage = 'granted';
-                window.__consentState.ad_user_data = 'granted';
-                window.__consentState.ad_personalization = 'granted';
-            }
+            // Update ad consent (covers grant and revoke)
+            window.__consentState.ad_storage = marketingAccepted ? 'granted' : 'denied';
+            window.__consentState.ad_user_data = marketingAccepted ? 'granted' : 'denied';
+            window.__consentState.ad_personalization = marketingAccepted ? 'granted' : 'denied';
+
+            // Update functionality consent (covers grant and revoke)
+            window.__consentState.functionality_storage = functionalityAccepted ? 'granted' : 'denied';
+            window.__consentState.personalization_storage = functionalityAccepted ? 'granted' : 'denied';
 
             // Update Google's consent mode if gtag exists
             if (typeof gtag === 'function') {
@@ -378,7 +384,10 @@
                     analytics_storage: window.__consentState.analytics_storage,
                     ad_storage: window.__consentState.ad_storage,
                     ad_user_data: window.__consentState.ad_user_data,
-                    ad_personalization: window.__consentState.ad_personalization
+                    ad_personalization: window.__consentState.ad_personalization,
+                    functionality_storage: window.__consentState.functionality_storage,
+                    personalization_storage: window.__consentState.personalization_storage,
+                    security_storage: window.__consentState.security_storage
                 });
             }
 
