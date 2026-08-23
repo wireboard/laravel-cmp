@@ -9,7 +9,9 @@
 <link rel="stylesheet" href="{{ $customCmpConfig['css_path'] ?? '/vendor/cmp/css/cookieconsent.min.css' }}">
 <link rel="stylesheet" href="{{ $customCmpConfig['theme_css_path'] ?? '/vendor/cmp/css/cookieconsent-theme.min.css' }}">
 <style>
-    .cm {
+    /* Loaded after the theme stylesheet so these override its #cc-main values
+       for every CMP surface (consent modal, preferences modal, toggles). */
+    #cc-main {
         {!! $themeCssVariables !!}
     }
 </style>
