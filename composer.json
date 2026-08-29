@@ -1,7 +1,7 @@
 {
     "name": "wireboard/laravel-cmp",
     "description": "Consent management platform for Laravel with WireBoard Analytics, GA4, and Google Funding Choices support",
-    "version": "1.5.2",
+    "version": "1.6.0",
     "keywords": [
         "laravel",
         "gdpr",
@@ -48,6 +48,9 @@
                 "Cmp": "Wireboard\\Cmp\\Facades\\Cmp"
             }
         }
+    },
+    "scripts": {
+        "test": "phpunit"
     },
     "config": {
         "sort-packages": true

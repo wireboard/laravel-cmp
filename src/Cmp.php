@@ -76,6 +76,22 @@ class Cmp
     }
 
     /**
+     * Get single-page application configuration.
+     */
+    public function getSpaConfig(): array
+    {
+        return $this->config['spa'] ?? [];
+    }
+
+    /**
+     * Whether client-side navigations are reported as page views.
+     */
+    public function isSpaTrackingEnabled(): bool
+    {
+        return (bool) ($this->config['spa']['enabled'] ?? true);
+    }
+
+    /**
      * Get custom CMP configuration.
      */
     public function getCustomCmpConfig(): array

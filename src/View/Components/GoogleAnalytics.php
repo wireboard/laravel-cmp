@@ -19,12 +19,24 @@ class GoogleAnalytics extends Component
     public ?string $measurementId;
     public string $cookieFlags;
 
+    /**
+     * Whether to send our own page view on client-side navigation.
+     *
+     * Off by default: GA4's Enhanced Measurement already reports "page changes
+     * based on browser history events", and that option ships enabled on every
+     * web data stream, so sending one as well double-counts. Turn this on only
+     * after switching that option off in the GA4 UI.
+     */
+    public bool $spaPageViews;
+
     public function __construct()
     {
         $this->cmpEnabled = Cmp::isEnabled();
         $this->enabled = Cmp::isGa4Enabled();
         $this->measurementId = Cmp::getGa4MeasurementId();
         $this->cookieFlags = Cmp::getGa4CookieFlags();
+        $this->spaPageViews = Cmp::isSpaTrackingEnabled()
+            && (bool) Cmp::get('google_analytics.spa_page_views', false);
     }
 
     public function render(): View|string

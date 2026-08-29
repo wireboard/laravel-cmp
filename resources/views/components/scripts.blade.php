@@ -15,3 +15,7 @@
 
 {{-- 5. WireBoard Analytics (legitimate interest, cookieless by default) --}}
 <x-cmp-wireboard />
+
+{{-- 6. SPA bridge - turns client-side navigations into page views. Last, so
+       the trackers above have already registered their listeners. --}}
+<x-cmp-spa-bridge />

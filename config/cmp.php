@@ -39,6 +39,16 @@ return [
         'enabled' => env('CMP_GA4_ENABLED', false),
         'measurement_id' => env('CMP_GA4_ID'),
         'cookie_flags' => 'SameSite=Lax',
+
+        /*
+        | Send our own page_view on client-side navigation.
+        |
+        | Leave this off unless you have switched "page changes based on
+        | browser history events" OFF in the GA4 UI (Admin > Data streams >
+        | Enhanced measurement). That option is enabled by default and already
+        | reports SPA navigations, so turning both on double-counts them.
+        */
+        'spa_page_views' => env('CMP_GA4_SPA_PAGE_VIEWS', false),
     ],
 
     /*
@@ -61,6 +71,64 @@ return [
         'load_events_script' => env('CMP_WIREBOARD_LOAD_EVENTS', false), // Load events.min.js for automatic event tracking
         'events_js_url' => env('CMP_WIREBOARD_EVENTS_JS_URL', 'https://static.wireboard.io/events.min.js'),
         'initialization_timeout' => 2000, // ms - fallback timeout if no consent interaction
+
+        /*
+        | Tracker contexts attached to every event.
+        |
+        | performance_timing reads the deprecated window.performance.timing of
+        | the *document* load. On a single-page app that snapshot describes the
+        | first page for the rest of the session, and collectors that post-
+        | process it have been seen throwing on navigations that carry no fresh
+        | navigation-timing entry. Turn it off for SPA hosts.
+        */
+        'contexts' => [
+            'performance_timing' => env('CMP_WIREBOARD_PERFORMANCE_TIMING', true),
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Single-page application support
+    |--------------------------------------------------------------------------
+    |
+    | Inertia, Turbo, Livewire and client-side routers replace the page without
+    | a document load, so a tracker that sends its page view once at boot
+    | records an entire session as a single page. This bridge turns each
+    | client-side navigation back into a page view for every enabled tracker.
+    |
+    | It is inert on a classic multi-page app: none of these events fire and
+    | the URL only changes through a real document load.
+    |
+    | Hosts can also trigger one by hand:  window.cmpTrackPageView()
+    |
+    */
+    'spa' => [
+        'enabled' => env('CMP_SPA_TRACKING', true),
+
+        // Framework navigation events listened for on `document` and `window`.
+        'events' => [
+            'inertia:navigate',   // Inertia.js
+            'turbo:load',         // Hotwire Turbo
+            'livewire:navigated', // Livewire wire:navigate
+            'page:load',          // Turbolinks (legacy)
+        ],
+
+        // Also watch the History API, which covers routers that fire no event
+        // of their own (React Router, Vue Router, plain pushState).
+        'watch_history' => true,
+
+        // Whether the fragment is part of the address.
+        //
+        // Off by default. On a classic site `#pricing` is a jump within the
+        // page, not a new one, and only Chromium reports it as a navigation,
+        // so counting it would split the numbers by browser. Turn it on for a
+        // hash router, where `#/dashboard` really is the address.
+        'hash_routing' => false,
+
+        // How long to wait for <title> to settle before reporting, in
+        // milliseconds. The report goes out as soon as the title changes, so
+        // this is only the ceiling for pages that keep the same title.
+        'title_wait' => 250,
     ],
 
     /*

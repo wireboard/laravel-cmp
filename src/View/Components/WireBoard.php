@@ -20,12 +20,20 @@ class WireBoard extends Component
     public array $config;
     public string $loadingMode;
 
+    /**
+     * Whether the deprecated document performance-timing context rides along
+     * with every event. Off is the sane choice on a single-page app, where the
+     * snapshot describes the first page for the whole session.
+     */
+    public bool $performanceTiming;
+
     public function __construct()
     {
         $this->cmpEnabled = Cmp::isEnabled();
         $this->enabled = Cmp::isWireBoardEnabled();
         $this->config = Cmp::getWireBoardConfig();
         $this->loadingMode = $this->config['loading_mode'] ?? 'cookieless_first';
+        $this->performanceTiming = (bool) ($this->config['contexts']['performance_timing'] ?? true);
     }
 
     public function render(): View|string

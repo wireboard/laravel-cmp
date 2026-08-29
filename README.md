@@ -19,6 +19,126 @@ A consent management platform for Laravel with support for [WireBoard Analytics]
 - **Floating Settings Button** - Cookie icon button to reopen preferences after consent
 - **13 Languages** - English, French, German, Spanish, Italian, Dutch, Portuguese, Polish, Danish, Swedish, Norwegian, Finnish, Hungarian
 - **Publishable Assets** - Customize CSS, JS, translations, and views
+- **SPA page views** - Inertia, Turbo, Livewire and History-API navigations are tracked, not just the first load
+
+## Single-page applications (Inertia, Turbo, Livewire, client routers)
+
+Analytics tags send their page view once, when the document loads. An SPA then
+replaces the page without ever loading another document, so **an entire session
+is recorded as a single page view**.
+
+The package ships a bridge that turns each client-side navigation back into a
+page view for every enabled tracker. It is included in `<x-cmp::scripts />` and
+is on by default. A classic multi-page app is unaffected: none of these events
+fire there, and a link that loads a new document is already counted the usual
+way. If such an app changes the URL with `pushState` of its own, for a filter
+or for pagination, that does count as a view, which is normally what you want.
+Set `watch_history` to `false` if it is not.
+
+It listens for `inertia:navigate`, `turbo:load`, `livewire:navigated` and
+`page:load`, and also watches the History API so routers that announce nothing
+of their own (React Router, Vue Router, plain `pushState`) are covered too.
+Where the browser exposes the Navigation API it is used directly, and the
+History patch is only the fallback.
+
+One navigation announces itself several times over: a framework event, its own
+`pushState`, and the Navigation API. They all carry the same address, so the
+bridge reports a view only when the address actually changed. There is
+deliberately no time window: one would also swallow a genuine second navigation
+made moments after the first.
+
+The fragment is not part of that address. Clicking `#pricing` is a jump within
+the page, and only Chromium's Navigation API calls it a navigation at all, so
+counting it would report views that Firefox and Safari never send and split
+your numbers by browser. Set `hash_routing` to `true` if you run a hash router,
+where `#/dashboard` really is the address.
+
+The report waits for `<title>` to settle, because frameworks set the title
+while the new page mounts. It goes out on the first title change, or after
+`title_wait` for a page that keeps the same title.
+
+```php
+// config/cmp.php
+'spa' => [
+    'enabled' => env('CMP_SPA_TRACKING', true),
+    'events' => ['inertia:navigate', 'turbo:load', 'livewire:navigated', 'page:load'],
+    'watch_history' => true,
+    'hash_routing' => false,
+    'title_wait' => 250,
+],
+```
+
+Report a view the router never announced (a tab, a modal route, a filter that
+changes no URL):
+
+```js
+window.cmpTrackPageView();
+```
+
+Every navigation also dispatches `cmp:pageview` on `window`, carrying
+`{ url, referrer, title }`, so a host can hook its own tags onto the same
+signal:
+
+```js
+window.addEventListener('cmp:pageview', (event) => {
+    myTag('page', event.detail.url);
+});
+```
+
+### The performance-timing context
+
+WireBoard attaches a `performanceTiming` context built from the deprecated
+`window.performance.timing` of the **document** load. On an SPA that snapshot
+describes the first page for the rest of the session, and collectors that
+post-process it have been seen throwing on navigations that carry no fresh
+navigation-timing entry. SPA hosts should turn it off:
+
+```dotenv
+CMP_WIREBOARD_PERFORMANCE_TIMING=false
+```
+
+It stays on by default so existing installations keep collecting what they
+always did.
+
+## Upgrading from 1.5.x
+
+Nothing breaks and no configuration is required, but two things are worth
+knowing.
+
+**If you published the views, re-publish them.** Published views take priority
+over the package's own, so a `resources/views/vendor/cmp/scripts.blade.php`
+from 1.5.x has no `<x-cmp-spa-bridge />` in it and you will get no SPA tracking
+at all, with nothing to indicate why. Either re-publish:
+
+```bash
+php artisan vendor:publish --tag=cmp-views --force
+```
+
+or add the component yourself, last in the file, so the trackers above it have
+already registered their listeners:
+
+```blade
+<x-cmp-spa-bridge />
+```
+
+Diff your other published views against the package before overwriting them if
+you have customised any.
+
+**Your published config keeps working untouched.** The package merges its
+defaults under whatever you have published, so the new `spa` block arrives on
+its own and SPA tracking turns on. The merge is shallow, though, which means
+new keys *inside* a block you have already published do not reach you:
+`wireboard.contexts.performance_timing` and `google_analytics.spa_page_views`
+both fall back to their safe values instead. Re-publish the config, or copy
+those keys across by hand, if you want them.
+
+The same fallbacks apply if you deploy with `php artisan config:cache` and have
+not re-cached yet, so an upgrade never changes behaviour before you are ready
+for it.
+
+GA4 is left alone by default. Enhanced Measurement already reports history
+navigations on every data stream, so the package does not send its own unless
+you opt in with `google_analytics.spa_page_views`.
 
 ## Requirements
 

@@ -1,9 +1,15 @@
 {{-- WireBoard Analytics --}}
+@php
+    $sdkUrl = $config['js_url'] ?? 'https://static.wireboard.io/wireboard.js';
+    $eventsUrl = $config['events_js_url'] ?? 'https://static.wireboard.io/events.min.js';
+    $publisher = $config['publisher'] ?? null;
+@endphp
 @if($loadingMode === 'consent_required')
 {{-- Consent Required Mode: Only load after user grants analytics consent (like GA4) --}}
 <script>
 (function() {
     var wireboardLoaded = false;
+    var trackerReady = false;
 
     function loadWireBoard() {
         if (wireboardLoaded) return;
@@ -22,39 +28,68 @@
                 oar.src=e;
                 oar.onload = initTracker;
                 d.parentNode.insertBefore(oar,d);
+            } else {
+                // Another snippet already loaded the SDK: still set up our
+                // tracker, otherwise nothing is ever sent.
+                initTracker();
             }
-        }(window,document,"script","{{ $config['js_url'] ?? 'https://static.wireboard.io/wireboard.js' }}","wireboard"));
+        }(window,document,"script",@json($sdkUrl),"wireboard"));
     }
 
     function initTracker() {
-        wireboard('newTracker', 'wb', '{{ $config['pipeline'] }}', {
-            appId: '{{ $config['app_id'] }}',
+        if (trackerReady) return;
+        trackerReady = true;
+
+        wireboard('newTracker', 'wb', @json($config['pipeline']), {
+            appId: @json($config['app_id']),
             forceSecureTracker: true,
             useCookies: true,
             useLocalStorage: true,
             contexts: {
-                performanceTiming: true
+                performanceTiming: @json($performanceTiming)
             }
         });
         wireboard('enableActivityTracking', 5, 10);
 
-        @if(!empty($config['publisher']))
-        var customContext = [{
-            schema: 'wb:io.wireboard/publisher',
-            data: { publisher: '{{ $config['publisher'] }}' }
-        }];
-        wireboard('trackPageView', null, customContext);
-        @else
-        wireboard('trackPageView');
-        @endif
+        trackPageView();
 
         @if(!empty($config['load_events_script']))
         // Load events script for automatic event tracking
         var eventsScript = document.createElement('script');
-        eventsScript.src = '{{ $config['events_js_url'] ?? 'https://static.wireboard.io/events.min.js' }}';
+        eventsScript.src = @json($eventsUrl);
         document.head.appendChild(eventsScript);
         @endif
     }
+
+    /**
+     * Send one page view. Wrapped: a fault inside the vendor SDK must never
+     * take the host page down with it.
+     */
+    function trackPageView(referrer) {
+        try {
+            if (referrer) {
+                wireboard('setReferrerUrl', referrer);
+            }
+            @if(!empty($publisher))
+            wireboard('trackPageView', null, [{
+                schema: 'wb:io.wireboard/publisher',
+                data: { publisher: @json($publisher) }
+            }]);
+            @else
+            wireboard('trackPageView');
+            @endif
+        } catch (error) {
+            if (window.console && console.debug) {
+                console.debug('[cmp] WireBoard page view skipped', error);
+            }
+        }
+    }
+
+    // Client-side navigation, announced by <x-cmp-spa-bridge />.
+    window.addEventListener('cmp:pageview', function (event) {
+        if (!trackerReady) return;
+        trackPageView(event.detail && event.detail.referrer);
+    });
 
     // Listen for consent - only load when analytics consent is granted
     window.addEventListener('consent.update', function(e) {
@@ -88,7 +123,7 @@
             oar.src=e;
             d.parentNode.insertBefore(oar,d);
         }
-    }(window,document,"script","{{ $config['js_url'] ?? 'https://static.wireboard.io/wireboard.js' }}","wireboard"));
+    }(window,document,"script",@json($sdkUrl),"wireboard"));
 
     // Initialize WireBoard with appropriate consent settings
     function initWireBoard(hasConsent) {
@@ -104,34 +139,56 @@
         }
         wireboardInitialized = true;
 
-        wireboard('newTracker', 'wb', '{{ $config['pipeline'] }}', {
-            appId: '{{ $config['app_id'] }}',
+        wireboard('newTracker', 'wb', @json($config['pipeline']), {
+            appId: @json($config['app_id']),
             forceSecureTracker: true,
             useCookies: hasConsent,
             useLocalStorage: hasConsent,
             contexts: {
-                performanceTiming: true
+                performanceTiming: @json($performanceTiming)
             }
         });
         wireboard('enableActivityTracking', 5, 10);
 
-        @if(!empty($config['publisher']))
-        var customContext = [{
-            schema: 'wb:io.wireboard/publisher',
-            data: { publisher: '{{ $config['publisher'] }}' }
-        }];
-        wireboard('trackPageView', null, customContext);
-        @else
-        wireboard('trackPageView');
-        @endif
+        trackPageView();
 
         @if(!empty($config['load_events_script']))
         // Load events script for automatic event tracking
         var eventsScript = document.createElement('script');
-        eventsScript.src = '{{ $config['events_js_url'] ?? 'https://static.wireboard.io/events.min.js' }}';
+        eventsScript.src = @json($eventsUrl);
         document.head.appendChild(eventsScript);
         @endif
     }
+
+    /**
+     * Send one page view. Wrapped: a fault inside the vendor SDK must never
+     * take the host page down with it.
+     */
+    function trackPageView(referrer) {
+        try {
+            if (referrer) {
+                wireboard('setReferrerUrl', referrer);
+            }
+            @if(!empty($publisher))
+            wireboard('trackPageView', null, [{
+                schema: 'wb:io.wireboard/publisher',
+                data: { publisher: @json($publisher) }
+            }]);
+            @else
+            wireboard('trackPageView');
+            @endif
+        } catch (error) {
+            if (window.console && console.debug) {
+                console.debug('[cmp] WireBoard page view skipped', error);
+            }
+        }
+    }
+
+    // Client-side navigation, announced by <x-cmp-spa-bridge />.
+    window.addEventListener('cmp:pageview', function (event) {
+        if (!wireboardInitialized) return;
+        trackPageView(event.detail && event.detail.referrer);
+    });
 
     // Listen for consent updates (user interacts with CMP)
     window.addEventListener('consent.update', function(e) {
@@ -146,7 +203,7 @@
             var hasConsent = (window.__consentState && window.__consentState.analytics_storage === 'granted');
             initWireBoard(hasConsent);
         }
-    }, {{ $config['initialization_timeout'] ?? 2000 }});
+    }, {{ (int) ($config['initialization_timeout'] ?? 2000) }});
 })();
 </script>
 @endif

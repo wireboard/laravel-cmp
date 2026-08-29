@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Facade;
  * @method static string getGa4CookieFlags()
  * @method static bool isWireBoardEnabled()
  * @method static array getWireBoardConfig()
+ * @method static array getSpaConfig()
+ * @method static bool isSpaTrackingEnabled()
  * @method static array getCustomCmpConfig()
  * @method static array getThemeConfig()
  * @method static array getConsentDefaults()
