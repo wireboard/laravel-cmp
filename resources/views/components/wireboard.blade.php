@@ -85,7 +85,7 @@
         }
     }
 
-    // Client-side navigation, announced by <x-cmp-spa-bridge />.
+    // Client-side navigation, announced by the SPA bridge component.
     window.addEventListener('cmp:pageview', function (event) {
         if (!trackerReady) return;
         trackPageView(event.detail && event.detail.referrer);
@@ -184,7 +184,7 @@
         }
     }
 
-    // Client-side navigation, announced by <x-cmp-spa-bridge />.
+    // Client-side navigation, announced by the SPA bridge component.
     window.addEventListener('cmp:pageview', function (event) {
         if (!wireboardInitialized) return;
         trackPageView(event.detail && event.detail.referrer);
