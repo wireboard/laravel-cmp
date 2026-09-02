@@ -62,21 +62,28 @@
     }
 
     /**
-     * Send one page view. Wrapped: a fault inside the vendor SDK must never
-     * take the host page down with it.
+     * Send one page view. `view` names the address, referrer and title of the
+     * page it describes, so a view the bridge sends late (flushed by the next
+     * navigation) still reports its own page and not the one the visitor is
+     * on by now. Wrapped: a fault inside the vendor SDK must never take the
+     * host page down with it.
      */
-    function trackPageView(referrer) {
+    function trackPageView(view) {
         try {
-            if (referrer) {
-                wireboard('setReferrerUrl', referrer);
+            if (view && view.url) {
+                wireboard('setCustomUrl', view.url);
             }
+            if (view && view.referrer) {
+                wireboard('setReferrerUrl', view.referrer);
+            }
+            var title = view && view.title ? view.title : null;
             @if(!empty($publisher))
-            wireboard('trackPageView', null, [{
+            wireboard('trackPageView', title, [{
                 schema: 'wb:io.wireboard/publisher',
                 data: { publisher: @json($publisher) }
             }]);
             @else
-            wireboard('trackPageView');
+            wireboard('trackPageView', title);
             @endif
         } catch (error) {
             if (window.console && console.debug) {
@@ -85,10 +92,11 @@
         }
     }
 
-    // Client-side navigation, announced by the SPA bridge component.
+    // Client-side navigation, announced by the SPA bridge component. Views
+    // from before consent are not kept: nothing is tracked until it is given.
     window.addEventListener('cmp:pageview', function (event) {
         if (!trackerReady) return;
-        trackPageView(event.detail && event.detail.referrer);
+        trackPageView(event.detail || {});
     });
 
     // Listen for consent - only load when analytics consent is granted
@@ -109,6 +117,16 @@
 <script>
 (function() {
     var wireboardInitialized = false;
+
+    // Tracking in this mode starts at the landing page, but the tracker only
+    // comes up on a consent interaction or after the initialization timeout.
+    // Page views announced before that are kept, and sent once it is up:
+    // the landing page first, under its own address, then the rest in order.
+    // Without this a visitor who clicks through in the first seconds loses
+    // the landing page, and the entry is recorded on whatever page they had
+    // reached by then.
+    var landingUrl = window.location.href;
+    var early = [];
 
     // Load WireBoard SDK immediately (just the library, not the tracker)
     ;(function(w,i,r,e,b,oar,d){
@@ -150,7 +168,16 @@
         });
         wireboard('enableActivityTracking', 5, 10);
 
-        trackPageView();
+        // With nothing queued the landing page is the current one and the
+        // SDK reads its address and title itself. Otherwise both are named,
+        // since the visitor has moved on; the bridge saw the title the
+        // landing page had when they left it.
+        trackPageView(early.length ? { url: landingUrl, title: early[0].previousTitle } : null);
+
+        for (var i = 0; i < early.length; i++) {
+            trackPageView(early[i]);
+        }
+        early = [];
 
         @if(!empty($config['load_events_script']))
         // Load events script for automatic event tracking
@@ -161,21 +188,27 @@
     }
 
     /**
-     * Send one page view. Wrapped: a fault inside the vendor SDK must never
-     * take the host page down with it.
+     * Send one page view. `view` names the address, referrer and title of the
+     * page it describes, so a view sent late still reports its own page and
+     * not the one the visitor is on by now. Wrapped: a fault inside the
+     * vendor SDK must never take the host page down with it.
      */
-    function trackPageView(referrer) {
+    function trackPageView(view) {
         try {
-            if (referrer) {
-                wireboard('setReferrerUrl', referrer);
+            if (view && view.url) {
+                wireboard('setCustomUrl', view.url);
             }
+            if (view && view.referrer) {
+                wireboard('setReferrerUrl', view.referrer);
+            }
+            var title = view && view.title ? view.title : null;
             @if(!empty($publisher))
-            wireboard('trackPageView', null, [{
+            wireboard('trackPageView', title, [{
                 schema: 'wb:io.wireboard/publisher',
                 data: { publisher: @json($publisher) }
             }]);
             @else
-            wireboard('trackPageView');
+            wireboard('trackPageView', title);
             @endif
         } catch (error) {
             if (window.console && console.debug) {
@@ -186,13 +219,19 @@
 
     // Client-side navigation, announced by the SPA bridge component.
     window.addEventListener('cmp:pageview', function (event) {
-        if (!wireboardInitialized) return;
-        trackPageView(event.detail && event.detail.referrer);
+        var view = event.detail || {};
+
+        if (!wireboardInitialized) {
+            early.push(view);
+            return;
+        }
+
+        trackPageView(view);
     });
 
     // Listen for consent updates (user interacts with CMP)
     window.addEventListener('consent.update', function(e) {
-        var hasConsent = (e.detail && e.detail.analytics_storage === 'granted');
+        var hasConsent = !!(e.detail && e.detail.analytics_storage === 'granted');
         initWireBoard(hasConsent);
     });
 
@@ -200,7 +239,7 @@
     // Handles: returning users with stored consent, or users who ignore CMP
     setTimeout(function() {
         if (!wireboardInitialized) {
-            var hasConsent = (window.__consentState && window.__consentState.analytics_storage === 'granted');
+            var hasConsent = !!(window.__consentState && window.__consentState.analytics_storage === 'granted');
             initWireBoard(hasConsent);
         }
     }, {{ (int) ($config['initialization_timeout'] ?? 2000) }});

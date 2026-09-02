@@ -120,7 +120,7 @@ class SpaTrackingTest extends TestCase
 
         // The wait can outlast the page: read the address at dispatch and a
         // report that goes out after the next navigation names the wrong page.
-        $this->assertStringContainsString('dispatch(url, previous)', $html);
+        $this->assertStringContainsString('dispatch(url, previous, titleBefore)', $html);
         $this->assertStringContainsString('url: url,', $html);
         $this->assertStringNotContainsString('url: window.location.href', $html);
     }
@@ -165,9 +165,35 @@ class SpaTrackingTest extends TestCase
     {
         $html = $this->renderScripts($this->wireboardOn());
 
-        // Not just at boot: a listener has to re-send it.
+        // Not just at boot: a listener has to re-send it, under the address,
+        // referrer and title the bridge reported. The SDK reading the
+        // location itself names the wrong page for a view sent late.
         $this->assertStringContainsString("addEventListener('cmp:pageview'", $html);
-        $this->assertStringContainsString('setReferrerUrl', $html);
+        $this->assertStringContainsString("wireboard('setCustomUrl', view.url)", $html);
+        $this->assertStringContainsString("wireboard('setReferrerUrl', view.referrer)", $html);
+        $this->assertStringContainsString("wireboard('trackPageView', title", $html);
+    }
+
+    public function test_wireboard_keeps_page_views_that_arrive_before_the_tracker(): void
+    {
+        $html = $this->renderScripts($this->wireboardOn());
+
+        // Cookieless-first is the default, and its tracker only comes up on
+        // a consent interaction or after the initialization timeout. Views
+        // from those first seconds must be kept and sent after the landing
+        // page, under its own address, or the entry page is misrecorded.
+        $this->assertStringContainsString('var landingUrl = window.location.href;', $html);
+        $this->assertStringContainsString('early.push(view);', $html);
+        $this->assertStringContainsString('url: landingUrl, title: early[0].previousTitle', $html);
+        $this->assertStringContainsString('previousTitle: previousTitle', $html);
+    }
+
+    public function test_wireboard_tracks_nothing_before_consent_when_consent_is_required(): void
+    {
+        $html = $this->renderScripts(array_merge($this->wireboardOn(), ['wireboard.loading_mode' => 'consent_required']));
+
+        $this->assertStringContainsString('if (!trackerReady) return;', $html);
+        $this->assertStringNotContainsString('early.push', $html);
     }
 
     public function test_wireboard_page_views_survive_a_fault_in_the_vendor_sdk(): void

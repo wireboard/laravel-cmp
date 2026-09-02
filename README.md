@@ -80,7 +80,8 @@ window.cmpTrackPageView();
 ```
 
 Every navigation also dispatches `cmp:pageview` on `window`, carrying
-`{ url, referrer, title }`, so a host can hook its own tags onto the same
+`{ url, referrer, title, previousTitle }` (the last being the title of the
+page just left), so a host can hook its own tags onto the same
 signal:
 
 ```js

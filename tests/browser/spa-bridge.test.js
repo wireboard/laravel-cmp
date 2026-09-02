@@ -10,8 +10,16 @@
 const { chromium } = require('playwright');
 const fs = require('fs');
 const path = require('path');
+const blade = require('./blade');
 
-const bridge = renderBridge(fs.readFileSync(path.join(__dirname, '../../resources/views/components/spa-bridge.blade.php'), 'utf8'));
+// The view as the component renders it for a host listening to
+// inertia:navigate with the default settings.
+const bridge = blade.scripts(blade.render(fs.readFileSync(path.join(__dirname, '../../resources/views/components/spa-bridge.blade.php'), 'utf8'), {
+    '$hashRouting': false,
+    '$titleWait': 250,
+    '$watchHistory': true,
+    '$events': ['inertia:navigate'],
+}));
 
 // The starting page: an Inertia head, the old page's title and meta tags.
 const HTML = '<!doctype html><html><head><meta charset="utf-8"><meta data-inertia="old-only" content="x"><meta data-inertia="description" content="old desc"><title data-inertia="">Old - App</title></head><body>page</body></html>';
@@ -90,28 +98,6 @@ const scenarios = {
         expect: [['/b', 'B - App', '/old'], ['/old', 'Old - App', '/b']],
     },
 };
-
-/**
- * The Blade view, with its directives resolved as the component would for a
- * host listening to inertia:navigate with the default settings.
- */
-function renderBridge(blade) {
-    const js = blade
-        .replace(/\{\{--[\s\S]*?--\}\}/g, '')
-        .replace(/<\/?script>/g, '')
-        .replace('@json($hashRouting)', 'false')
-        .replace('@json($titleWait)', '250')
-        .replace(/@foreach \(\$events as \$event\)[\s\S]*?@endforeach/, "['inertia:navigate'].forEach(function (ev) { document.addEventListener(ev, onNavigation); window.addEventListener(ev, onNavigation); });")
-        .replace('@if ($watchHistory)', '')
-        .replace('@endif', '');
-
-    const left = js.match(/@\w+|\{\{/);
-    if (left) {
-        throw new Error('unresolved Blade directive in spa-bridge: ' + left[0]);
-    }
-
-    return js;
-}
 
 (async () => {
     const browser = await chromium.launch();

@@ -34,14 +34,17 @@
      * Dispatch the page view. The address is the one seen when the navigation
      * was announced, so a report that goes out late still names its own page.
      * The title is read here, not then, because frameworks set it while the
-     * new page mounts.
+     * new page mounts. `previousTitle` is the title the page being left had
+     * at that moment, for a tag that wants to report that page after the
+     * fact.
      */
-    function dispatch(url, previous) {
+    function dispatch(url, previous, previousTitle) {
         window.dispatchEvent(new CustomEvent('cmp:pageview', {
             detail: {
                 url: url,
                 referrer: previous,
                 title: document.title,
+                previousTitle: previousTitle,
             },
         }));
     }
@@ -152,7 +155,7 @@
                 queued = null;
                 settle = whenTitleSettles(titleBefore, function () {
                     settle = null;
-                    dispatch(url, previous);
+                    dispatch(url, previous, titleBefore);
                 });
             }, 0),
         };
