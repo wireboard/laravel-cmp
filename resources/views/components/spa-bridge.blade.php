@@ -8,7 +8,8 @@
 
     var hashRouting = @json($hashRouting);
     var titleWait = @json($titleWait);
-    var pending = null;
+    var queued = null;
+    var settle = null;
 
     /**
      * The address a page view is keyed on. The fragment counts only for a hash
@@ -30,13 +31,15 @@
     var lastKey = navKey(lastUrl);
 
     /**
-     * Dispatch the page view. The title is read here, not when the navigation
-     * was detected, because frameworks set it while the new page mounts.
+     * Dispatch the page view. The address is the one seen when the navigation
+     * was announced, so a report that goes out late still names its own page.
+     * The title is read here, not then, because frameworks set it while the
+     * new page mounts.
      */
-    function dispatch(previous) {
+    function dispatch(url, previous) {
         window.dispatchEvent(new CustomEvent('cmp:pageview', {
             detail: {
-                url: window.location.href,
+                url: url,
                 referrer: previous,
                 title: document.title,
             },
@@ -45,48 +48,61 @@
 
     /**
      * Wait for the document title to settle before reporting, so a page view
-     * never carries the previous page's title. Resolves on the first title
-     * mutation, or after `titleWait` if the page kept the same title.
+     * never carries the previous page's title. `before` is the title seen when
+     * the navigation was announced: the wait ends once the title differs from
+     * it, or after `titleWait` for a page that keeps the same title.
+     *
+     * Only the title itself ends the wait. Anything else that touches the head
+     * (a stylesheet or preload link for a lazily loaded chunk, a tag injected
+     * by a script, a framework dropping the old page's meta tags before the
+     * title arrives) is noise, and used to end the wait too early, with the
+     * old title still in place.
+     *
+     * Returns a function that ends the wait at once, for the caller to use
+     * when the next navigation arrives before this one was reported.
      */
-    function whenTitleSettles(done) {
+    function whenTitleSettles(before, done) {
         var head = document.querySelector('head');
-
-        if (titleWait <= 0 || typeof MutationObserver !== 'function' || !head) {
-            window.setTimeout(done, 0);
-
-            return;
-        }
-
         var settled = false;
+        var observer = null;
+        var timer = null;
 
         function finish() {
             if (settled) {
                 return;
             }
             settled = true;
-            observer.disconnect();
+            if (observer) {
+                observer.disconnect();
+            }
             window.clearTimeout(timer);
             done();
         }
 
+        // Nothing to wait for: the title already moved since the announce (a
+        // router that sets it right after pushState, seen on the History
+        // patch, where the announce is synchronous), or waiting is off.
+        if (titleWait <= 0 || typeof MutationObserver !== 'function' || !head || document.title !== before) {
+            timer = window.setTimeout(finish, 0);
+
+            return finish;
+        }
+
         // Frameworks replace the <title> node as often as they edit it, so
-        // watch the whole head rather than one element that may be gone.
-        var observer = new MutationObserver(function (records) {
-            for (var i = 0; i < records.length; i++) {
-                var target = records[i].target;
-
-                if (target && (target.nodeName === 'TITLE' || target.nodeName === 'HEAD')) {
-                    // One more frame: the title may be set in several passes.
-                    window.setTimeout(finish, 0);
-
-                    return;
-                }
+        // watch the whole head rather than one element that may be gone, and
+        // judge by the outcome rather than by which node moved.
+        observer = new MutationObserver(function () {
+            if (document.title !== before) {
+                // One more frame: the title may be set in several passes.
+                window.setTimeout(finish, 0);
             }
         });
 
         observer.observe(head, { childList: true, subtree: true, characterData: true });
 
-        var timer = window.setTimeout(finish, titleWait);
+        timer = window.setTimeout(finish, titleWait);
+
+        return finish;
     }
 
     /**
@@ -107,20 +123,39 @@
         }
 
         var previous = lastUrl;
+        var titleBefore = document.title;
         lastUrl = url;
         lastKey = key;
 
-        // Anything still queued from this same tick describes this same move.
-        if (pending) {
-            window.clearTimeout(pending);
+        // Anything still queued from this same tick describes this same move
+        // (a router correcting the address it just pushed). That address was
+        // never a page, so the referrer and the starting title stay those of
+        // the page before it.
+        if (queued) {
+            window.clearTimeout(queued.timer);
+            previous = queued.previous;
+            titleBefore = queued.titleBefore;
         }
 
-        pending = window.setTimeout(function () {
-            pending = null;
-            whenTitleSettles(function () {
-                dispatch(previous);
-            });
-        }, 0);
+        // A report still waiting on the previous page's title goes out now,
+        // with that page's address and the title as it stands. Left waiting,
+        // it would see this page's title land and report this page twice,
+        // and the previous one never.
+        if (settle) {
+            settle();
+        }
+
+        queued = {
+            previous: previous,
+            titleBefore: titleBefore,
+            timer: window.setTimeout(function () {
+                queued = null;
+                settle = whenTitleSettles(titleBefore, function () {
+                    settle = null;
+                    dispatch(url, previous);
+                });
+            }, 0),
+        };
     }
 
     // Public hook, so a host can report a view its router never announced.

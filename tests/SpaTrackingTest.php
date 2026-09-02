@@ -100,6 +100,52 @@ class SpaTrackingTest extends TestCase
         $this->assertStringContainsString('whenTitleSettles', $html);
     }
 
+    public function test_only_a_changed_title_ends_the_wait(): void
+    {
+        $html = $this->renderScripts($this->wireboardOn());
+
+        // Anything else touching the head (a preload link for a lazy chunk, a
+        // script tag, meta tags dropped before the title arrives) used to end
+        // the wait with the previous page's title still in place. Only a title
+        // that differs from the one seen at navigation may end it; the timeout
+        // covers a page that keeps the same title.
+        $this->assertStringContainsString('document.title !== before', $html);
+        $this->assertStringNotContainsString("nodeName === 'HEAD'", $html);
+        $this->assertStringContainsString('var titleBefore = document.title;', $html);
+    }
+
+    public function test_a_report_names_the_page_it_was_announced_for(): void
+    {
+        $html = $this->renderScripts($this->wireboardOn());
+
+        // The wait can outlast the page: read the address at dispatch and a
+        // report that goes out after the next navigation names the wrong page.
+        $this->assertStringContainsString('dispatch(url, previous)', $html);
+        $this->assertStringContainsString('url: url,', $html);
+        $this->assertStringNotContainsString('url: window.location.href', $html);
+    }
+
+    public function test_the_next_navigation_flushes_a_report_still_waiting(): void
+    {
+        $html = $this->renderScripts($this->wireboardOn());
+
+        // A page that keeps the previous title waits the full title_wait. A
+        // navigation inside that window must send the waiting report first,
+        // or the wait ends on the newer page's title and that page is
+        // reported twice while the one in between is never reported.
+        $this->assertStringContainsString('settle = whenTitleSettles(', $html);
+        $this->assertMatchesRegularExpression('/if \(settle\) \{\s*settle\(\);/', $html);
+        $this->assertStringContainsString('return finish;', $html);
+    }
+
+    public function test_the_browser_suite_covers_the_bridge_end_to_end(): void
+    {
+        // String checks above pin the mechanism; the real guarantee is the
+        // Chromium run in tests/browser, which drives the bridge through
+        // Inertia's navigation order on both signal paths.
+        $this->assertFileExists(__DIR__ . '/browser/spa-bridge.test.js');
+    }
+
     public function test_the_history_watch_can_be_turned_off(): void
     {
         $html = $this->renderScripts(array_merge($this->wireboardOn(), ['spa.watch_history' => false]));

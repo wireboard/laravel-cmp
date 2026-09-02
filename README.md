@@ -54,8 +54,12 @@ your numbers by browser. Set `hash_routing` to `true` if you run a hash router,
 where `#/dashboard` really is the address.
 
 The report waits for `<title>` to settle, because frameworks set the title
-while the new page mounts. It goes out on the first title change, or after
-`title_wait` for a page that keeps the same title.
+while the new page mounts. It goes out once the title differs from the one
+seen at navigation, or after `title_wait` for a page that keeps the same
+title. Nothing else that touches the head (meta tags being swapped, a
+stylesheet for a lazily loaded chunk) ends the wait. A navigation that
+arrives while the previous report is still waiting sends that report first,
+with its own address, so every page is reported once and in order.
 
 ```php
 // config/cmp.php
