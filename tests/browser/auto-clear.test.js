@@ -4,7 +4,9 @@
  * and checks that withdrawing analytics consent deletes the analytics cookies
  * and nothing else. Up to 1.6.3 the script read only the library's own names
  * (autoClear, readOnly), so the documented auto_clear list was ignored and
- * withdrawal cleared no cookie at all.
+ * withdrawal cleared no cookie at all. Up to 1.6.4, Google Analytics was
+ * not told before the reload that follows a withdrawal, and wrote its session
+ * cookie again in between.
  *
  *   npm install && npx playwright install chromium && npm run test:browser
  */
@@ -17,6 +19,19 @@ const file = (name) => fs.readFileSync(path.join(__dirname, '../../', name), 'ut
 const ORIGIN = 'http://app.test';
 const ANALYTICS_COOKIES = ['/^_ga/', '_gid', '/^_wb_/'];
 const PLANTED = ['_ga', '_ga_ABC123', '_gid', '_wb_id.914d', '_wb_ses.914d', 'unrelated'];
+
+// Stands in for GA4: once started, it writes its session cookie every 10 ms
+// until Consent Mode says analytics_storage is denied, as the real one keeps
+// writing on every hit while it runs.
+const FAKE_GA = `window.__analyticsStorage = 'granted';
+window.gtag = function (command, action, params) {
+    if (command === 'consent' && params && params.analytics_storage) window.__analyticsStorage = params.analytics_storage;
+};
+window.__startGa = function () {
+    setInterval(function () {
+        if (window.__analyticsStorage !== 'denied') document.cookie = '_ga_LIVE=1; path=/; max-age=3600';
+    }, 10);
+};`;
 
 const config = (categories) => ({
     translationsPath: '/vendor/cmp/translations/',
@@ -34,30 +49,38 @@ const config = (categories) => ({
     termsUrl: null,
 });
 
+const documented = {
+    necessary: { enabled: true, read_only: true },
+    analytics: { enabled: true, read_only: false, auto_clear: ANALYTICS_COOKIES },
+};
+
 const scenarios = {
-    'config/cmp.php names (read_only, auto_clear)': config({
-        necessary: { enabled: true, read_only: true },
-        analytics: { enabled: true, read_only: false, auto_clear: ANALYTICS_COOKIES },
-    }),
-    'library names (readOnly, autoClear)': config({
-        necessary: { enabled: true, readOnly: true },
-        analytics: { enabled: true, readOnly: false, autoClear: ANALYTICS_COOKIES },
-    }),
-    'an extra category with its own auto_clear': config({
-        necessary: { enabled: true, read_only: true },
-        analytics: { enabled: true, read_only: false, auto_clear: ['/^_ga/', '_gid'] },
-        marketing: { enabled: false, read_only: false, auto_clear: ['/^_wb_/'] },
-    }),
+    'config/cmp.php names (read_only, auto_clear)': { config: config(documented) },
+    'library names (readOnly, autoClear)': {
+        config: config({
+            necessary: { enabled: true, readOnly: true },
+            analytics: { enabled: true, readOnly: false, autoClear: ANALYTICS_COOKIES },
+        }),
+    },
+    'an extra category with its own auto_clear': {
+        config: config({
+            necessary: { enabled: true, read_only: true },
+            analytics: { enabled: true, read_only: false, auto_clear: ['/^_ga/', '_gid'] },
+            marketing: { enabled: false, read_only: false, auto_clear: ['/^_wb_/'] },
+        }),
+    },
+    'GA4 still writing its session cookie when consent is withdrawn': { config: config(documented), gaKeepsWriting: true },
 };
 
 (async () => {
     const browser = await chromium.launch();
     let failures = 0;
 
-    for (const [name, cmpConfig] of Object.entries(scenarios)) {
+    for (const [name, scenario] of Object.entries(scenarios)) {
         const html = `<!doctype html><html lang="en"><head><meta charset="utf-8"><title>App</title></head><body>`
+            + `<script>${FAKE_GA}</script>`
             + `<script>${file('dist/js/cookieconsent.umd.min.js')}</script>`
-            + `<script>window.__cmpType = 'custom'; window.__cmpConfig = ${JSON.stringify(cmpConfig)};</script>`
+            + `<script>window.__cmpType = 'custom'; window.__cmpConfig = ${JSON.stringify(scenario.config)};</script>`
             + `<script>${file('dist/js/consent-cmp.min.js')}</script></body></html>`;
 
         const context = await browser.newContext();
@@ -83,8 +106,16 @@ const scenarios = {
 
         await page.evaluate(() => window.CookieConsent.acceptCategory('all'));
         await page.evaluate((names) => names.forEach((cookie) => { document.cookie = `${cookie}=1; path=/; max-age=3600`; }), PLANTED);
-        await page.evaluate(() => window.CookieConsent.acceptCategory([]));
-        await page.waitForTimeout(500);
+        if (scenario.gaKeepsWriting) {
+            await page.evaluate(() => window.__startGa());
+            await page.waitForTimeout(50);
+        }
+        // A withdrawal reloads the page 100 ms later: wait for the new one.
+        await Promise.all([
+            page.waitForEvent('load', { timeout: 3000 }).catch(() => null),
+            page.evaluate(() => window.CookieConsent.acceptCategory([])),
+        ]);
+        await page.waitForTimeout(300);
 
         const left = (await context.cookies()).map((cookie) => cookie.name).sort();
         await context.close();

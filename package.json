@@ -1,6 +1,6 @@
 {
     "name": "wireboard-laravel-cmp",
-    "version": "1.6.4",
+    "version": "1.6.5",
     "description": "WireBoard.io consent management platform for Laravel with GA4 support",
     "private": true,
     "scripts": {

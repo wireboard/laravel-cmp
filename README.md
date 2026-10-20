@@ -105,12 +105,15 @@ CMP_WIREBOARD_PERFORMANCE_TIMING=false
 It stays on by default so existing installations keep collecting what they
 always did.
 
-## Upgrading to 1.6.4
+## Upgrading to 1.6.4 and 1.6.5
 
 Up to 1.6.3, withdrawing consent deleted no cookie: the script read only
 `autoClear` and `readOnly`, while `config/cmp.php` and this README write
-`auto_clear` and `read_only`. 1.6.4 reads both. Pages load the published copy
-of the script, so re-publish it after updating:
+`auto_clear` and `read_only`. 1.6.4 reads both. Up to 1.6.4, Google Analytics
+was not told before the reload that follows a withdrawal, and could write its
+session cookie (`_ga_<id>`) again in between; 1.6.5 denies its consent first
+and clears the cookies once more just before the reload. Pages load the
+published copy of the script, so re-publish it after updating:
 
 ```bash
 php artisan vendor:publish --tag=cmp-assets --force

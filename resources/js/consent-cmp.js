@@ -165,7 +165,14 @@
                     // Page reload required when analytics preference changes
                     // because GA4 cannot be unloaded once loaded
                     if (param.changedCategories && param.changedCategories.includes('analytics')) {
+                        if (!CookieConsent.acceptedCategory('analytics')) {
+                            // Withdrawn: tell GA4 first, or it writes its
+                            // session cookie (_ga_<id>) again before the
+                            // reload, and erase once more just before it.
+                            handleConsentChange(param);
+                        }
                         setTimeout(function() {
+                            eraseRejected(categories, param.changedCategories);
                             window.location.reload();
                         }, 100);
                         return;
@@ -318,6 +325,22 @@
             });
 
             return categories;
+        }
+
+        /**
+         * Erase the cookies of every category in the list that is no longer
+         * accepted, as autoClear does when consent changes.
+         */
+        function eraseRejected(categories, categoryNames) {
+            categoryNames.forEach(function(name) {
+                var category = categories[name];
+                if (!category || !category.autoClear || CookieConsent.acceptedCategory(name)) {
+                    return;
+                }
+                CookieConsent.eraseCookies(category.autoClear.cookies.map(function(cookie) {
+                    return cookie.name;
+                }));
+            });
         }
 
         /**
