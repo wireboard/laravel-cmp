@@ -290,15 +290,15 @@
             if (configCategories.necessary) {
                 categories.necessary = {
                     enabled: configCategories.necessary.enabled !== false,
-                    readOnly: configCategories.necessary.readOnly !== false
+                    readOnly: setting(configCategories.necessary, 'read_only', 'readOnly') !== false
                 };
             }
 
             if (configCategories.analytics) {
                 categories.analytics = {
                     enabled: configCategories.analytics.enabled !== false,
-                    readOnly: configCategories.analytics.readOnly === true,
-                    autoClear: buildAutoClear(configCategories.analytics.autoClear)
+                    readOnly: setting(configCategories.analytics, 'read_only', 'readOnly') === true,
+                    autoClear: buildAutoClear(setting(configCategories.analytics, 'auto_clear', 'autoClear'))
                 };
             }
 
@@ -306,17 +306,29 @@
             Object.keys(configCategories).forEach(function(key) {
                 if (key !== 'necessary' && key !== 'analytics') {
                     var cat = configCategories[key];
+                    var autoClear = setting(cat, 'auto_clear', 'autoClear');
                     categories[key] = {
                         enabled: cat.enabled === true,
-                        readOnly: cat.readOnly === true
+                        readOnly: setting(cat, 'read_only', 'readOnly') === true
                     };
-                    if (cat.autoClear) {
-                        categories[key].autoClear = buildAutoClear(cat.autoClear);
+                    if (autoClear) {
+                        categories[key].autoClear = buildAutoClear(autoClear);
                     }
                 }
             });
 
             return categories;
+        }
+
+        /**
+         * A category setting under its config/cmp.php name (read_only,
+         * auto_clear), which reaches the page unchanged, or under the
+         * library's own name (readOnly, autoClear). Reading only the
+         * library's name ignored every documented setting: withdrawing
+         * consent cleared no cookie.
+         */
+        function setting(category, configName, libraryName) {
+            return category[configName] !== undefined ? category[configName] : category[libraryName];
         }
 
         /**

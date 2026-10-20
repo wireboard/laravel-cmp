@@ -105,6 +105,25 @@ CMP_WIREBOARD_PERFORMANCE_TIMING=false
 It stays on by default so existing installations keep collecting what they
 always did.
 
+## Upgrading to 1.6.4
+
+Up to 1.6.3, withdrawing consent deleted no cookie: the script read only
+`autoClear` and `readOnly`, while `config/cmp.php` and this README write
+`auto_clear` and `read_only`. 1.6.4 reads both. Pages load the published copy
+of the script, so re-publish it after updating:
+
+```bash
+php artisan vendor:publish --tag=cmp-assets --force
+```
+
+Check that the translations are published too (`public/vendor/cmp/translations`):
+without them the banner shows its built-in English text and logs a failed
+request.
+
+```bash
+php artisan vendor:publish --tag=cmp-translations
+```
+
 ## Upgrading from 1.5.x
 
 Nothing breaks and no configuration is required, but two things are worth
