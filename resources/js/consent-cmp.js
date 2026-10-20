@@ -12,6 +12,14 @@
     'use strict';
 
     /**
+     * localStorage entries the WireBoard tracker writes once analytics is
+     * accepted: device id (wb_duid), visit state and its event queue.
+     * Without consent it keeps them in memory. autoClear only handles
+     * cookies, so these are erased with the analytics cookies.
+     */
+    var WIREBOARD_STORAGE = [/^wb_duid$/, /^wireboard_(step|last_request|last_url)$/, /^wireboardOutQueue/];
+
+    /**
      * Main initialization function for Custom CMP
      * Called either immediately (for custom CMP mode) or via cmp.fallback event (for Google CMP fallback)
      */
@@ -158,6 +166,11 @@
 
                 // Callbacks
                 onConsent: function(param) {
+                    // On every page load: nothing a refused category allowed
+                    // may survive, such as a cookie a script wrote just before
+                    // the reload that follows a withdrawal, or data left from
+                    // a withdrawal made before 1.6.6.
+                    eraseRejected(categories, Object.keys(categories));
                     handleConsentChange(param);
                     showSettingsButton(config);
                 },
@@ -329,18 +342,37 @@
 
         /**
          * Erase the cookies of every category in the list that is no longer
-         * accepted, as autoClear does when consent changes.
+         * accepted, as autoClear does when consent changes, and the WireBoard
+         * tracker's localStorage entries when analytics is not accepted.
          */
         function eraseRejected(categories, categoryNames) {
             categoryNames.forEach(function(name) {
                 var category = categories[name];
-                if (!category || !category.autoClear || CookieConsent.acceptedCategory(name)) {
+                if (!category || CookieConsent.acceptedCategory(name)) {
                     return;
                 }
-                CookieConsent.eraseCookies(category.autoClear.cookies.map(function(cookie) {
-                    return cookie.name;
-                }));
+                if (category.autoClear) {
+                    CookieConsent.eraseCookies(category.autoClear.cookies.map(function(cookie) {
+                        return cookie.name;
+                    }));
+                }
+                if (name === 'analytics') {
+                    eraseStorage(WIREBOARD_STORAGE);
+                }
             });
+        }
+
+        function eraseStorage(patterns) {
+            try {
+                for (var i = localStorage.length - 1; i >= 0; i--) {
+                    var key = localStorage.key(i);
+                    if (key && patterns.some(function(pattern) { return pattern.test(key); })) {
+                        localStorage.removeItem(key);
+                    }
+                }
+            } catch (e) {
+                // localStorage unavailable (privacy mode): nothing was stored there
+            }
         }
 
         /**

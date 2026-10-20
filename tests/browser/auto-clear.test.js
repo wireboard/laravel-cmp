@@ -6,7 +6,9 @@
  * (autoClear, readOnly), so the documented auto_clear list was ignored and
  * withdrawal cleared no cookie at all. Up to 1.6.4, Google Analytics was
  * not told before the reload that follows a withdrawal, and wrote its session
- * cookie again in between.
+ * cookie again in between. Up to 1.6.5, the WireBoard tracker's localStorage
+ * entries (wb_duid device id, visit state, event queue) survived, and nothing
+ * was cleaned on later page loads while consent stayed refused.
  *
  *   npm install && npx playwright install chromium && npm run test:browser
  */
@@ -19,6 +21,8 @@ const file = (name) => fs.readFileSync(path.join(__dirname, '../../', name), 'ut
 const ORIGIN = 'http://app.test';
 const ANALYTICS_COOKIES = ['/^_ga/', '_gid', '/^_wb_/'];
 const PLANTED = ['_ga', '_ga_ABC123', '_gid', '_wb_id.914d', '_wb_ses.914d', 'unrelated'];
+// What the WireBoard tracker stores with consent, plus an app's own entry
+const PLANTED_STORAGE = ['wb_duid', 'wireboard_step', 'wireboard_last_request', 'wireboard_last_url', 'wireboardOutQueue_wireboard_wb_post2', 'app_setting'];
 
 // Stands in for GA4: once started, it writes its session cookie every 10 ms
 // until Consent Mode says analytics_storage is denied, as the real one keeps
@@ -70,6 +74,7 @@ const scenarios = {
         }),
     },
     'GA4 still writing its session cookie when consent is withdrawn': { config: config(documented), gaKeepsWriting: true },
+    'leftovers erased on the next page load while consent stays refused': { config: config(documented), refusedThenReload: true },
 };
 
 (async () => {
@@ -104,28 +109,46 @@ const scenarios = {
         await page.goto(ORIGIN + '/');
         await page.waitForFunction(() => window.CookieConsent && document.querySelector('#cc-main'));
 
-        await page.evaluate(() => window.CookieConsent.acceptCategory('all'));
-        await page.evaluate((names) => names.forEach((cookie) => { document.cookie = `${cookie}=1; path=/; max-age=3600`; }), PLANTED);
-        if (scenario.gaKeepsWriting) {
-            await page.evaluate(() => window.__startGa());
-            await page.waitForTimeout(50);
+        const plant = () => page.evaluate(([cookies, keys]) => {
+            cookies.forEach((cookie) => { document.cookie = `${cookie}=1; path=/; max-age=3600`; });
+            keys.forEach((key) => localStorage.setItem(key, '1'));
+        }, [PLANTED, PLANTED_STORAGE]);
+
+        if (scenario.refusedThenReload) {
+            // Refused first (no reload, nothing changed), then data appears
+            // (a script after the withdrawal's reload, or an older version)
+            await page.evaluate(() => window.CookieConsent.acceptCategory([]));
+            await plant();
+            await page.reload();
+            // Consent already given: no banner is built, wait for the library
+            await page.waitForFunction(() => window.CookieConsent && window.CookieConsent.validConsent());
+        } else {
+            await page.evaluate(() => window.CookieConsent.acceptCategory('all'));
+            await plant();
+            if (scenario.gaKeepsWriting) {
+                await page.evaluate(() => window.__startGa());
+                await page.waitForTimeout(50);
+            }
+            // A withdrawal reloads the page 100 ms later: wait for the new one.
+            await Promise.all([
+                page.waitForEvent('load', { timeout: 3000 }).catch(() => null),
+                page.evaluate(() => window.CookieConsent.acceptCategory([])),
+            ]);
         }
-        // A withdrawal reloads the page 100 ms later: wait for the new one.
-        await Promise.all([
-            page.waitForEvent('load', { timeout: 3000 }).catch(() => null),
-            page.evaluate(() => window.CookieConsent.acceptCategory([])),
-        ]);
         await page.waitForTimeout(300);
 
         const left = (await context.cookies()).map((cookie) => cookie.name).sort();
+        const leftStorage = (await page.evaluate(() => Object.keys(localStorage))).sort();
         await context.close();
 
         const expected = ['cc_cookie', 'unrelated'];
-        const ok = JSON.stringify(left) === JSON.stringify(expected);
+        const expectedStorage = ['app_setting'];
+        const ok = JSON.stringify(left) === JSON.stringify(expected)
+            && JSON.stringify(leftStorage) === JSON.stringify(expectedStorage);
         if (!ok) {
             failures++;
         }
-        console.log(`${ok ? 'ok  ' : 'FAIL'} ${name}` + (ok ? '' : `\n     left     ${JSON.stringify(left)}\n     expected ${JSON.stringify(expected)}`));
+        console.log(`${ok ? 'ok  ' : 'FAIL'} ${name}` + (ok ? '' : `\n     left     ${JSON.stringify(left)} ${JSON.stringify(leftStorage)}\n     expected ${JSON.stringify(expected)} ${JSON.stringify(expectedStorage)}`));
     }
 
     await browser.close();

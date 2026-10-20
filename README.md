@@ -105,15 +105,20 @@ CMP_WIREBOARD_PERFORMANCE_TIMING=false
 It stays on by default so existing installations keep collecting what they
 always did.
 
-## Upgrading to 1.6.4 and 1.6.5
+## Upgrading to 1.6.4, 1.6.5 and 1.6.6
 
 Up to 1.6.3, withdrawing consent deleted no cookie: the script read only
 `autoClear` and `readOnly`, while `config/cmp.php` and this README write
 `auto_clear` and `read_only`. 1.6.4 reads both. Up to 1.6.4, Google Analytics
 was not told before the reload that follows a withdrawal, and could write its
 session cookie (`_ga_<id>`) again in between; 1.6.5 denies its consent first
-and clears the cookies once more just before the reload. Pages load the
-published copy of the script, so re-publish it after updating:
+and clears the cookies once more just before the reload. Up to 1.6.5, the
+WireBoard tracker's localStorage entries (the `wb_duid` device id, visit
+state and event queue) survived a withdrawal, since `auto_clear` only covers
+cookies; 1.6.6 erases them with the analytics cookies, and on every page load
+while a category stays refused it erases that category's cookies again (a
+cookie written just before the reload, or left by an older version). Pages
+load the published copy of the script, so re-publish it after updating:
 
 ```bash
 php artisan vendor:publish --tag=cmp-assets --force
